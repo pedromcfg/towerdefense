@@ -597,48 +597,67 @@ function processGUISprites() {
 
 // CONFIG é um objeto mutável que pode ser alterado pelas opções
 // Valores padrão (serão sobrescritos pelas opções se existirem)
+// Default configuration values (used for reset)
+const DEFAULT_CONFIG = {
+    STARTING_COINS: 200,
+    STARTING_VILLAGE_LIFE: 100,
+    TOWER_COST: 50,
+    ENEMY_REWARD: 10,
+    TOWER_RANGE: 50,
+    TOWER_DAMAGE: 25,
+    TOWER_FIRE_RATE: 1000,
+    TOWER_BASIC_COST: 50,
+    TOWER_UPGRADE_COST: 500,
+    TOWER_PREMIUM_COST: 1000,
+    ENEMY_SPEED: 1.0,
+    ENEMY_HEALTH: 50,
+    ENEMIES_PER_WAVE: 5,
+    WAVE_MULTIPLIER: 1.2,
+    MAX_WAVES: 10,
+};
+
 const CONFIG = {
-    // Dimensões do grid (15 colunas x 15 linhas = 750x750 pixels)
+    // Grid dimensions (15 columns x 15 rows = 750x750 pixels)
     GRID_COLS: 15,
     GRID_ROWS: 15,
     
-    // Tamanho de cada célula do grid (em pixels)
+    // Size of each grid cell (in pixels)
     CELL_SIZE: 50,
     
-    // Recursos iniciais (podem ser alterados nas opções)
+    // Initial resources (can be changed in options)
     STARTING_COINS: 200,
     STARTING_VILLAGE_LIFE: 100,
     
-    // Custo da torre (pode ser alterado nas opções)
+    // Tower cost (can be changed in options)
     TOWER_COST: 50,
     
-    // Recompensa por matar inimigo (pode ser alterado nas opções)
+    // Reward for killing enemy (can be changed in options)
     ENEMY_REWARD: 10,
     
-    // Configurações das torres (podem ser alteradas nas opções)
-    TOWER_RANGE: 100,        // Alcance em pixels
-    TOWER_DAMAGE: 25,        // Dano por projétil
-    TOWER_FIRE_RATE: 1000,   // Tempo entre disparos (ms) - para torre basic
+    // Tower settings (can be changed in options)
+    TOWER_RANGE: 50,        // Range in pixels
+    TOWER_DAMAGE: 25,        // Damage per projectile
+    TOWER_FIRE_RATE: 1000,   // Time between shots (ms) - for basic tower
     
-    // Custos das torres
-    TOWER_BASIC_COST: 50,    // Custo da torre basic
-    TOWER_UPGRADE_COST: 500, // Custo da torre upgrade
-    TOWER_PREMIUM_COST: 1000, // Custo da torre premium
+    // Tower costs
+    TOWER_BASIC_COST: 50,    // Basic tower cost
+    TOWER_UPGRADE_COST: 500, // Upgrade tower cost
+    TOWER_PREMIUM_COST: 1000, // Premium tower cost
     
-    // Configurações dos inimigos (podem ser alteradas nas opções)
+    // Enemy settings (can be changed in options)
     ENEMY_SIZE: 30,
-    ENEMY_SPEED: 0.5,        // Velocidade base (pixels por frame)
-    ENEMY_HEALTH: 50,        // Vida inicial
+    ENEMY_SPEED: 1.0,        // Base speed (pixels per frame) - 1.0 is balanced
+    ENEMY_HEALTH: 50,        // Initial health
     
-    // Configurações dos projéteis
+    // Projectile settings
     PROJECTILE_SIZE: 8,
-    PROJECTILE_SPEED: 5,
+    PROJECTILE_SPEED: 10,    // Balanced speed (2x enemy speed for good gameplay)
     
-    // Configurações das waves (podem ser alteradas nas opções)
-    WAVE_PAUSE_TIME: 3000,   // Pausa entre waves (ms)
-    ENEMIES_PER_WAVE: 5,     // Inimigos iniciais por wave
-    WAVE_MULTIPLIER: 1.2,    // Multiplicador de dificuldade por wave
-    MAX_WAVES: 10,           // Número máximo de waves (pode ser alterado nas opções)
+    // Wave settings (can be changed in options)
+    WAVE_PAUSE_TIME: 3000,   // Pause between waves (ms)
+    ENEMIES_PER_WAVE: 5,     // Initial enemies per wave
+    WAVE_MULTIPLIER: 1.2,    // Difficulty multiplier per wave
+    MAX_WAVES: 10,           // Maximum number of waves (can be changed in options)
 };
 
 // ============================================
@@ -1451,17 +1470,17 @@ class Game {
             towerCost = CONFIG.TOWER_PREMIUM_COST;
         }
 
-        // Verifica se tem moedas suficientes para comprar a torre
+        // Checks if player has enough coins to buy the tower
         if (this.coins < towerCost) {
-            alert(`Moedas insuficientes! Necessário: ${towerCost}`);
-            return; // Não tem dinheiro suficiente
+            alert(`Insufficient coins! Required: ${towerCost}`);
+            return; // Not enough money
         }
 
-        // Tudo OK! Coloca a torre com o nível selecionado
+        // Everything OK! Place the tower with the selected level
         this.towers.push(new Tower(gridX, gridY, 1, this.selectedTowerLevel));
-        // Deduz o custo da torre das moedas
+        // Deduct the tower cost from coins
         this.coins -= towerCost;
-        // Atualiza o HUD para mostrar as novas moedas
+        // Update HUD to show new coins
         this.updateHUD();
     }
 
@@ -1608,7 +1627,7 @@ class Game {
                 // Verifica se completou todas as waves configuradas
                 if (this.wave >= CONFIG.MAX_WAVES) {
                     this.gameOver = true;
-                    alert(`Parabéns! Você completou todas as ${CONFIG.MAX_WAVES} waves!`);
+                    alert(`Congratulations! You completed all ${CONFIG.MAX_WAVES} waves!`);
                 }
             }
         }
@@ -1639,7 +1658,7 @@ class Game {
                 // Se a vida chegou a zero, game over
                 if (this.villageLife <= 0) {
                     this.gameOver = true;
-                    alert('Game Over! A aldeia foi destruída!');
+                    alert('Game Over! The village was destroyed!');
                 }
                 // Remove o inimigo que chegou ao fim
                 this.enemies.splice(i, 1);
@@ -1989,9 +2008,9 @@ class Game {
         const costBasic = document.getElementById('cost-basic');
         const costUpgrade = document.getElementById('cost-upgrade');
         const costPremium = document.getElementById('cost-premium');
-        if (costBasic) costBasic.textContent = `${CONFIG.TOWER_BASIC_COST} moedas`;
-        if (costUpgrade) costUpgrade.textContent = `${CONFIG.TOWER_UPGRADE_COST} moedas`;
-        if (costPremium) costPremium.textContent = `${CONFIG.TOWER_PREMIUM_COST} moedas`;
+        if (costBasic) costBasic.textContent = `${CONFIG.TOWER_BASIC_COST} coins`;
+        if (costUpgrade) costUpgrade.textContent = `${CONFIG.TOWER_UPGRADE_COST} coins`;
+        if (costPremium) costPremium.textContent = `${CONFIG.TOWER_PREMIUM_COST} coins`;
     }
 
     /**
@@ -2019,7 +2038,7 @@ class Game {
         this.paused = !this.paused;
         const btnPause = document.getElementById('btnPause');
         if (btnPause) {
-            btnPause.textContent = this.paused ? 'Continuar' : 'Pausa';
+            btnPause.textContent = this.paused ? 'Resume' : 'Pause';
         }
     }
     
@@ -2086,6 +2105,9 @@ class MenuManager {
      * Aguarda as imagens do GUI carregarem e desenha os backgrounds
      */
     async waitForImagesAndDraw() {
+        // Position buttons for initial menu (using img tag)
+        this.positionInitialMenuButtons();
+        
         // Aguarda um pouco para garantir que as imagens começaram a carregar
         // Tenta várias vezes porque as imagens podem carregar em momentos diferentes
         let attempts = 0;
@@ -2093,8 +2115,8 @@ class MenuManager {
         
         const tryDraw = () => {
             attempts++;
-            // Verifica se as imagens já carregaram
-            if (IMAGES.mainMenu || IMAGES.settings || IMAGES.buttons) {
+            // Verifica se as imagens já carregaram (apenas para options menu agora)
+            if (IMAGES.settings || IMAGES.buttons) {
                 this.drawMenuBackgrounds();
                 // Se os sprites foram processados, atualiza os botões
                 if (IMAGES.buttonNormal) {
@@ -2107,6 +2129,84 @@ class MenuManager {
         };
         
         setTimeout(tryDraw, 100);
+    }
+    
+    /**
+     * Positions the clickable buttons relative to the initial menu image
+     */
+    positionInitialMenuButtons() {
+        const img = document.getElementById('initialMenuImage');
+        const btnPlay = document.getElementById('btnPlay');
+        const btnOptions = document.getElementById('btnOptions');
+        
+        if (!img || !btnPlay || !btnOptions) return;
+        
+        // Wait for image to load
+        if (img.complete) {
+            this.calculateButtonPositions(img, btnPlay, btnOptions);
+        } else {
+            img.onload = () => {
+                this.calculateButtonPositions(img, btnPlay, btnOptions);
+            };
+        }
+        
+        // Also recalculate on window resize
+        window.addEventListener('resize', () => {
+            if (img.complete) {
+                this.calculateButtonPositions(img, btnPlay, btnOptions);
+            }
+        });
+    }
+    
+    /**
+     * Calculates button positions based on image scale
+     */
+    calculateButtonPositions(img, btnPlay, btnOptions) {
+        // Get natural (original) image dimensions
+        const naturalWidth = img.naturalWidth;
+        const naturalHeight = img.naturalHeight;
+        
+        // Get displayed image dimensions
+        const displayedWidth = img.offsetWidth;
+        const displayedHeight = img.offsetHeight;
+        
+        // Calculate scale factors
+        const scaleX = displayedWidth / naturalWidth;
+        const scaleY = displayedHeight / naturalHeight;
+        
+        // Original button positions (from image coordinates)
+        const playX = 359.3;
+        const playY = 1323.9;
+        const playW = 375.3;
+        const playH = 116.3;
+        
+        const optionsX = 359.3;
+        const optionsY = 1487.7;
+        const optionsW = 375.3;
+        const optionsH = 116.3;
+        
+        // Get image position relative to container
+        const imgRect = img.getBoundingClientRect();
+        const containerRect = img.parentElement.getBoundingClientRect();
+        
+        // Calculate positions relative to image (not container)
+        const imgOffsetX = imgRect.left - containerRect.left;
+        const imgOffsetY = imgRect.top - containerRect.top;
+        
+        // Calculate scaled positions relative to container
+        btnPlay.style.left = (imgOffsetX + playX * scaleX) + 'px';
+        btnPlay.style.top = (imgOffsetY + playY * scaleY) + 'px';
+        btnPlay.style.width = (playW * scaleX) + 'px';
+        btnPlay.style.height = (playH * scaleY) + 'px';
+        
+        btnOptions.style.left = (imgOffsetX + optionsX * scaleX) + 'px';
+        btnOptions.style.top = (imgOffsetY + optionsY * scaleY) + 'px';
+        btnOptions.style.width = (optionsW * scaleX) + 'px';
+        btnOptions.style.height = (optionsH * scaleY) + 'px';
+        
+        // Position buttons relative to container
+        btnPlay.style.position = 'absolute';
+        btnOptions.style.position = 'absolute';
     }
     
     /**
@@ -2216,11 +2316,28 @@ class MenuManager {
     }
     
     /**
-     * Aplica as opções ao CONFIG
+     * Applies options to CONFIG
      */
     applyOptions() {
-        // As opções já foram aplicadas no loadOptions()
-        // Esta função existe para poder ser chamada manualmente se necessário
+        // Options are already applied in loadOptions()
+        // This function exists to be called manually if needed
+    }
+    
+    /**
+     * Resets all options to default values
+     */
+    resetDefaults() {
+        // Restore all CONFIG values from DEFAULT_CONFIG
+        Object.assign(CONFIG, DEFAULT_CONFIG);
+        
+        // Update the UI with default values
+        this.updateOptionsUI();
+        
+        // Save the defaults
+        this.saveOptions();
+        
+        // Show confirmation
+        alert('Options reset to default values!');
     }
     
     /**
@@ -2277,12 +2394,12 @@ class MenuManager {
         CONFIG.TOWER_UPGRADE_COST = parseInt(document.getElementById('optTowerUpgradeCost').value) || 500;
         CONFIG.TOWER_PREMIUM_COST = parseInt(document.getElementById('optTowerPremiumCost').value) || 1000;
         CONFIG.ENEMY_REWARD = parseInt(document.getElementById('optEnemyReward').value) || 10;
-        CONFIG.TOWER_RANGE = parseInt(document.getElementById('optTowerRange').value) || 100;
+        CONFIG.TOWER_RANGE = parseInt(document.getElementById('optTowerRange').value) || 50;
         CONFIG.TOWER_DAMAGE = parseInt(document.getElementById('optTowerDamage').value) || 25;
         CONFIG.TOWER_FIRE_RATE = parseInt(document.getElementById('optTowerFireRate').value) || 1000;
         CONFIG.STARTING_COINS = parseInt(document.getElementById('optStartingCoins').value) || 200;
         CONFIG.STARTING_VILLAGE_LIFE = parseInt(document.getElementById('optStartingLife').value) || 100;
-        CONFIG.ENEMY_SPEED = parseFloat(document.getElementById('optEnemySpeed').value) || 0.5;
+        CONFIG.ENEMY_SPEED = parseFloat(document.getElementById('optEnemySpeed').value) || 1.0;
         CONFIG.ENEMY_HEALTH = parseInt(document.getElementById('optEnemyHealth').value) || 50;
         CONFIG.ENEMIES_PER_WAVE = parseInt(document.getElementById('optEnemiesPerWave').value) || 5;
         CONFIG.WAVE_MULTIPLIER = parseFloat(document.getElementById('optWaveMultiplier').value) || 1.2;
@@ -2334,15 +2451,22 @@ class MenuManager {
             this.showMainMenu();
         });
         
-        // Botão Guardar - salva opções e volta ao menu
+        // Save button - saves options and returns to menu
         document.getElementById('btnSaveOptions').addEventListener('click', () => {
             this.readOptionsFromUI();
             this.saveOptions();
             this.showMainMenu();
-            alert('Opções guardadas!');
+            alert('Options saved!');
         });
         
-        // Botão Voltar do jogo (no HUD) - volta ao menu principal
+        // Reset Defaults button - restores all values to defaults
+        document.getElementById('btnResetDefaults').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all options to default values?')) {
+                this.resetDefaults();
+            }
+        });
+        
+        // Back button (in game HUD) - returns to main menu
         document.getElementById('btnBackToMainMenu').addEventListener('click', () => {
             if (window.gameInstance) {
                 window.gameInstance.gameOver = true; // Para o jogo
