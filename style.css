@@ -20,8 +20,88 @@ body {
     border-radius: 15px;
     padding: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    max-width: 900px;
+    max-width: 1200px;
     width: 100%;
+}
+
+/* Container do jogo e menu de compra */
+.game-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Menu de Compra de Torres (lateral) */
+.tower-shop {
+    background: #34495e;
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 250px;
+    color: white;
+}
+
+.shop-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #f39c12;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.tower-option {
+    background: #2c3e50;
+    border: 3px solid #34495e;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tower-option:hover {
+    background: #3d566e;
+    border-color: #f39c12;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tower-option.selected {
+    background: #16a085;
+    border-color: #f39c12;
+    box-shadow: 0 0 15px rgba(243, 156, 18, 0.5);
+}
+
+.tower-preview {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.tower-preview-canvas {
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+}
+
+.tower-info h4 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: #f39c12;
+}
+
+.tower-cost {
+    font-size: 16px;
+    font-weight: bold;
+    color: #f39c12;
+    margin: 5px 0;
+}
+
+.tower-stats {
+    font-size: 12px;
+    margin: 3px 0;
+    color: #ecf0f1;
+    opacity: 0.9;
 }
 
 /* HUD - Interface do utilizador */

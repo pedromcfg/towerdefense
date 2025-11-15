@@ -27,7 +27,11 @@ const IMAGES = {
         base: { basic: null, upgrade: null, premium: null },
         throwerFront: { basic: null, upgrade: null },
         projectile: [], // Array com 5 frames: [0] = projétil, [1-4] = explosão
-        animation: [] // Array com 9 frames da animação de disparo (tower1_1 a tower1_9)
+        animation: [], // Array com 9 frames da animação de disparo (tower1_1 a tower1_9) - DEPRECADO
+        // Novas animações por nível
+        animationBasic: [],    // 9 frames da torre basic
+        animationUpgrade: [],  // 9 frames da torre upgrade
+        animationPremium: []   // 9 frames da torre premium
     },
     tower2: {
         throwerBack: { basic: null, upgrade: null },
@@ -224,16 +228,37 @@ async function loadAllImages() {
             loadImage('tower1_projectile3', 'assets/towers/PNG/tower1/projectile1_3.png'),
             loadImage('tower1_projectile4', 'assets/towers/PNG/tower1/projectile1_4.png'),
             loadImage('tower1_projectile5', 'assets/towers/PNG/tower1/projectile1_5.png'),
-            // Tower 1 - Animação de disparo (9 frames: tower1_1 a tower1_9)
-            loadImage('tower1_anim1', 'assets/towers/PNG/tower1/tower1_1.png'),
-            loadImage('tower1_anim2', 'assets/towers/PNG/tower1/tower1_2.png'),
-            loadImage('tower1_anim3', 'assets/towers/PNG/tower1/tower1_3.png'),
-            loadImage('tower1_anim4', 'assets/towers/PNG/tower1/tower1_4.png'),
-            loadImage('tower1_anim5', 'assets/towers/PNG/tower1/tower1_5.png'),
-            loadImage('tower1_anim6', 'assets/towers/PNG/tower1/tower1_6.png'),
-            loadImage('tower1_anim7', 'assets/towers/PNG/tower1/tower1_7.png'),
-            loadImage('tower1_anim8', 'assets/towers/PNG/tower1/tower1_8.png'),
-            loadImage('tower1_anim9', 'assets/towers/PNG/tower1/tower1_9.png'),
+            // Tower 1 - Animações de disparo por nível (9 frames cada)
+            // Basic
+            loadImage('tower1_basic_1', 'assets/towers/PNG/tower1/tower1_basic/tower1_basic_1.png'),
+            loadImage('tower1_basic_2', 'assets/towers/PNG/tower1/tower1_basic/tower1_basic_2.png'),
+            loadImage('tower1_basic_3', 'assets/towers/PNG/tower1/tower1_basic/tower1_basic_3.png'),
+            loadImage('tower1_basic_4', 'assets/towers/PNG/tower1/tower1_basic/tower1_basic_4.png'),
+            loadImage('tower1_basic_5', 'assets/towers/PNG/tower1/tower1_basic/tower1_basic_5.png'),
+            loadImage('tower1_basic_6', 'assets/towers/PNG/tower1/tower1_basic/tower1_basic_6.png'),
+            loadImage('tower1_basic_7', 'assets/towers/PNG/tower1/tower1_basic/tower1_basic_7.png'),
+            loadImage('tower1_basic_8', 'assets/towers/PNG/tower1/tower1_basic/tower1_basic_8.png'),
+            loadImage('tower1_basic_9', 'assets/towers/PNG/tower1/tower1_basic/tower1_basic_9.png'),
+            // Upgrade
+            loadImage('tower1_upgrade_1', 'assets/towers/PNG/tower1/tower1_upgrade/tower1_upgrade_1.png'),
+            loadImage('tower1_upgrade_2', 'assets/towers/PNG/tower1/tower1_upgrade/tower1_upgrade_2.png'),
+            loadImage('tower1_upgrade_3', 'assets/towers/PNG/tower1/tower1_upgrade/tower1_upgrade_3.png'),
+            loadImage('tower1_upgrade_4', 'assets/towers/PNG/tower1/tower1_upgrade/tower1_upgrade_4.png'),
+            loadImage('tower1_upgrade_5', 'assets/towers/PNG/tower1/tower1_upgrade/tower1_upgrade_5.png'),
+            loadImage('tower1_upgrade_6', 'assets/towers/PNG/tower1/tower1_upgrade/tower1_upgrade_6.png'),
+            loadImage('tower1_upgrade_7', 'assets/towers/PNG/tower1/tower1_upgrade/tower1_upgrade_7.png'),
+            loadImage('tower1_upgrade_8', 'assets/towers/PNG/tower1/tower1_upgrade/tower1_upgrade_8.png'),
+            loadImage('tower1_upgrade_9', 'assets/towers/PNG/tower1/tower1_upgrade/tower1_upgrade_9.png'),
+            // Premium
+            loadImage('tower1_premium_1', 'assets/towers/PNG/tower1/tower1_premium/tower1_premium_1.png'),
+            loadImage('tower1_premium_2', 'assets/towers/PNG/tower1/tower1_premium/tower1_premium_2.png'),
+            loadImage('tower1_premium_3', 'assets/towers/PNG/tower1/tower1_premium/tower1_premium_3.png'),
+            loadImage('tower1_premium_4', 'assets/towers/PNG/tower1/tower1_premium/tower1_premium_4.png'),
+            loadImage('tower1_premium_5', 'assets/towers/PNG/tower1/tower1_premium/tower1_premium_5.png'),
+            loadImage('tower1_premium_6', 'assets/towers/PNG/tower1/tower1_premium/tower1_premium_6.png'),
+            loadImage('tower1_premium_7', 'assets/towers/PNG/tower1/tower1_premium/tower1_premium_7.png'),
+            loadImage('tower1_premium_8', 'assets/towers/PNG/tower1/tower1_premium/tower1_premium_8.png'),
+            loadImage('tower1_premium_9', 'assets/towers/PNG/tower1/tower1_premium/tower1_premium_9.png'),
             
             // Tower 2
             loadImage('tower2_throwerBackBasic', 'assets/towers/PNG/tower2/throwerBackBasic2.png'),
@@ -428,18 +453,27 @@ function organizeTowerSprites() {
             IMAGES.tower1_projectile4, // Explosão frame 3
             IMAGES.tower1_projectile5  // Explosão frame 4
         ];
-        // Animação de disparo: [0-8] = 9 frames da animação completa
-        IMAGES.tower1.animation = [
-            IMAGES.tower1_anim1, // Frame 1
-            IMAGES.tower1_anim2, // Frame 2
-            IMAGES.tower1_anim3, // Frame 3
-            IMAGES.tower1_anim4, // Frame 4
-            IMAGES.tower1_anim5, // Frame 5
-            IMAGES.tower1_anim6, // Frame 6
-            IMAGES.tower1_anim7, // Frame 7
-            IMAGES.tower1_anim8, // Frame 8
-            IMAGES.tower1_anim9  // Frame 9
+        // Animações de disparo por nível: [0-8] = 9 frames de cada animação
+        // Basic
+        IMAGES.tower1.animationBasic = [
+            IMAGES.tower1_basic_1, IMAGES.tower1_basic_2, IMAGES.tower1_basic_3,
+            IMAGES.tower1_basic_4, IMAGES.tower1_basic_5, IMAGES.tower1_basic_6,
+            IMAGES.tower1_basic_7, IMAGES.tower1_basic_8, IMAGES.tower1_basic_9
         ];
+        // Upgrade
+        IMAGES.tower1.animationUpgrade = [
+            IMAGES.tower1_upgrade_1, IMAGES.tower1_upgrade_2, IMAGES.tower1_upgrade_3,
+            IMAGES.tower1_upgrade_4, IMAGES.tower1_upgrade_5, IMAGES.tower1_upgrade_6,
+            IMAGES.tower1_upgrade_7, IMAGES.tower1_upgrade_8, IMAGES.tower1_upgrade_9
+        ];
+        // Premium
+        IMAGES.tower1.animationPremium = [
+            IMAGES.tower1_premium_1, IMAGES.tower1_premium_2, IMAGES.tower1_premium_3,
+            IMAGES.tower1_premium_4, IMAGES.tower1_premium_5, IMAGES.tower1_premium_6,
+            IMAGES.tower1_premium_7, IMAGES.tower1_premium_8, IMAGES.tower1_premium_9
+        ];
+        // Mantém compatibilidade com código antigo (usa basic como padrão)
+        IMAGES.tower1.animation = IMAGES.tower1.animationBasic;
         console.log('✓ Tower 1 organizada');
     }
     
@@ -584,7 +618,12 @@ const CONFIG = {
     // Configurações das torres (podem ser alteradas nas opções)
     TOWER_RANGE: 100,        // Alcance em pixels
     TOWER_DAMAGE: 25,        // Dano por projétil
-    TOWER_FIRE_RATE: 1000,   // Tempo entre disparos (ms)
+    TOWER_FIRE_RATE: 1000,   // Tempo entre disparos (ms) - para torre basic
+    
+    // Custos das torres
+    TOWER_BASIC_COST: 50,    // Custo da torre basic
+    TOWER_UPGRADE_COST: 500, // Custo da torre upgrade
+    TOWER_PREMIUM_COST: 1000, // Custo da torre premium
     
     // Configurações dos inimigos (podem ser alteradas nas opções)
     ENEMY_SIZE: 30,
@@ -950,8 +989,9 @@ class Tower {
      * @param {number} gridX - Posição X no grid
      * @param {number} gridY - Posição Y no grid
      * @param {number} towerType - Tipo de torre (1 ou 2)
+     * @param {string} upgradeLevel - Nível da torre: 'basic', 'upgrade', 'premium'
      */
-    constructor(gridX, gridY, towerType = 1) {
+    constructor(gridX, gridY, towerType = 1, upgradeLevel = 'basic') {
         // Posição no grid (coordenadas da célula)
         this.gridX = gridX;
         this.gridY = gridY;
@@ -969,7 +1009,19 @@ class Tower {
         // Tipo de torre (1 ou 2)
         this.towerType = towerType;
         // Nível de upgrade: 'basic', 'upgrade', 'premium'
-        this.upgradeLevel = 'basic';
+        this.upgradeLevel = upgradeLevel;
+        
+        // Configurações baseadas no nível
+        // Upgrade dispara ao dobro da velocidade (fireRate / 2)
+        // Premium dispara ao dobro da velocidade E dispara 2 projéteis
+        if (this.upgradeLevel === 'upgrade' || this.upgradeLevel === 'premium') {
+            this.fireRate = CONFIG.TOWER_FIRE_RATE / 2; // Metade do tempo = dobro da velocidade
+        } else {
+            this.fireRate = CONFIG.TOWER_FIRE_RATE;
+        }
+        
+        // Premium dispara 2 projéteis
+        this.projectilesPerShot = this.upgradeLevel === 'premium' ? 2 : 1;
         
         // Animação da torre (para efeito de slingshot)
         this.animationTime = 0; // Tempo desde o último disparo (para animação)
@@ -1016,14 +1068,14 @@ class Tower {
     }
 
     /**
-     * Dispara um projétil
+     * Dispara projéteis
      * @param {Enemy} target - Inimigo alvo
      * @param {number} currentTime - Tempo atual
-     * @returns {Projectile|null} - Novo projétil ou null
+     * @returns {Array<Projectile>} - Array de projéteis (1 para basic/upgrade, 2 para premium)
      */
     fire(target, currentTime) {
         // Se não há alvo, não dispara
-        if (!target) return null;
+        if (!target) return [];
 
         // Atualiza o tempo do último disparo (para controlar cooldown)
         this.lastFireTime = currentTime;
@@ -1031,9 +1083,24 @@ class Tower {
         this.animationTime = currentTime;
         this.isAnimating = true;
         this.animationFrame = 0;
-        // Cria e retorna um novo projétil na posição da torre, mirando no alvo
-        // Passa o tipo de torre para o projétil usar o sprite correto
-        return new Projectile(this.x, this.y, target, this.damage, this.towerType);
+        
+        // Cria os projéteis baseado no nível da torre
+        const projectiles = [];
+        
+        if (this.projectilesPerShot === 2) {
+            // Premium: dispara 2 projéteis
+            // Encontra um segundo alvo próximo (ou usa o mesmo)
+            projectiles.push(new Projectile(this.x, this.y, target, this.damage, this.towerType));
+            
+            // Tenta encontrar outro inimigo próximo para o segundo projétil
+            // Por enquanto, dispara os 2 no mesmo alvo (pode melhorar depois)
+            projectiles.push(new Projectile(this.x, this.y, target, this.damage, this.towerType));
+        } else {
+            // Basic e Upgrade: dispara 1 projétil
+            projectiles.push(new Projectile(this.x, this.y, target, this.damage, this.towerType));
+        }
+        
+        return projectiles;
     }
     
     /**
@@ -1088,9 +1155,19 @@ class Tower {
         const drawY = this.y - CONFIG.CELL_SIZE / 2;
         
         if (tower) {
+            // Escolhe qual animação usar baseado no nível da torre
+            let animationArray = null;
+            if (this.upgradeLevel === 'premium') {
+                animationArray = tower.animationPremium;
+            } else if (this.upgradeLevel === 'upgrade') {
+                animationArray = tower.animationUpgrade;
+            } else {
+                animationArray = tower.animationBasic;
+            }
+            
             // Se está animando (disparando), usa a animação completa
-            if (this.isAnimating && tower.animation && tower.animation.length > 0) {
-                const frame = tower.animation[this.animationFrame];
+            if (this.isAnimating && animationArray && animationArray.length > 0) {
+                const frame = animationArray[this.animationFrame];
                 if (frame) {
                     ctx.drawImage(frame, drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
                 } else {
@@ -1098,10 +1175,10 @@ class Tower {
                     this.drawFallback(ctx);
                 }
             } else {
-                // Se não está animando, usa o primeiro frame da animação (tower1_1.png) como estado padrão
-                if (tower.animation && tower.animation.length > 0 && tower.animation[0]) {
+                // Se não está animando, usa o primeiro frame da animação como estado padrão
+                if (animationArray && animationArray.length > 0 && animationArray[0]) {
                     // Usa o primeiro frame da animação como estado parado
-                    ctx.drawImage(tower.animation[0], drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                    ctx.drawImage(animationArray[0], drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
                 } else {
                     // Fallback: se a animação não estiver disponível, usa os componentes separados
                     // Desenha as 3 camadas na ordem correta (de trás para frente)
@@ -1242,6 +1319,15 @@ class Game {
             console.warn('⚠ Algumas imagens não carregaram. Continuando com fallbacks.');
         }
         
+        // Desenha os previews das torres no menu de compra
+        this.drawTowerShopPreviews();
+        
+        // Atualiza a seleção inicial (basic por padrão)
+        this.updateTowerShopSelection();
+        
+        // Atualiza os custos no menu de compra (já é chamado em drawTowerShopPreviews, mas garantimos aqui também)
+        this.updateTowerShopCosts();
+        
         // Inicia o loop do jogo (mesmo que algumas imagens não tenham carregado)
         this.lastTime = performance.now();
         this.gameLoop();
@@ -1293,6 +1379,32 @@ class Game {
 
             this.handleCanvasClick(x, y);
         });
+        
+        // Event listeners para o menu de compra de torres
+        const towerBasic = document.getElementById('tower-basic');
+        const towerUpgrade = document.getElementById('tower-upgrade');
+        const towerPremium = document.getElementById('tower-premium');
+        
+        if (towerBasic) {
+            towerBasic.addEventListener('click', () => {
+                this.selectedTowerLevel = 'basic';
+                this.updateTowerShopSelection();
+            });
+        }
+        
+        if (towerUpgrade) {
+            towerUpgrade.addEventListener('click', () => {
+                this.selectedTowerLevel = 'upgrade';
+                this.updateTowerShopSelection();
+            });
+        }
+        
+        if (towerPremium) {
+            towerPremium.addEventListener('click', () => {
+                this.selectedTowerLevel = 'premium';
+                this.updateTowerShopSelection();
+            });
+        }
 
         // Movimento do mouse para preview da torre
         this.canvas.addEventListener('mousemove', (e) => {
@@ -1331,17 +1443,24 @@ class Game {
             return; // Não pode colocar torre no caminho
         }
 
+        // Determina o custo baseado no nível selecionado
+        let towerCost = CONFIG.TOWER_BASIC_COST;
+        if (this.selectedTowerLevel === 'upgrade') {
+            towerCost = CONFIG.TOWER_UPGRADE_COST;
+        } else if (this.selectedTowerLevel === 'premium') {
+            towerCost = CONFIG.TOWER_PREMIUM_COST;
+        }
+
         // Verifica se tem moedas suficientes para comprar a torre
-        if (this.coins < CONFIG.TOWER_COST) {
-            alert('Moedas insuficientes!');
+        if (this.coins < towerCost) {
+            alert(`Moedas insuficientes! Necessário: ${towerCost}`);
             return; // Não tem dinheiro suficiente
         }
 
-        // Tudo OK! Coloca a torre
-        // Por padrão usa towerType = 1 (pode ser alterado depois para permitir escolher tipo)
-        this.towers.push(new Tower(gridX, gridY, 1));
+        // Tudo OK! Coloca a torre com o nível selecionado
+        this.towers.push(new Tower(gridX, gridY, 1, this.selectedTowerLevel));
         // Deduz o custo da torre das moedas
-        this.coins -= CONFIG.TOWER_COST;
+        this.coins -= towerCost;
         // Atualiza o HUD para mostrar as novas moedas
         this.updateHUD();
     }
@@ -1543,11 +1662,13 @@ class Game {
             // Cada torre tenta encontrar um alvo dentro do alcance
             const target = tower.findTarget(this.enemies, currentTime);
             if (target) {
-                // Se encontrou um alvo, dispara um projétil
-                const projectile = tower.fire(target, currentTime);
-                if (projectile) {
-                    // Adiciona o projétil ao array de projéteis
-                    this.projectiles.push(projectile);
+                // Se encontrou um alvo, dispara projéteis (pode ser 1 ou 2)
+                const projectiles = tower.fire(target, currentTime);
+                // Adiciona todos os projéteis ao array
+                for (const projectile of projectiles) {
+                    if (projectile) {
+                        this.projectiles.push(projectile);
+                    }
                 }
             }
         }
@@ -1581,7 +1702,14 @@ class Game {
         this.drawPath();
 
         // Desenha preview da torre (quando o mouse passa por cima de uma célula válida)
-        if (this.selectedTowerPosition && this.coins >= CONFIG.TOWER_COST) {
+        let towerCost = CONFIG.TOWER_BASIC_COST;
+        if (this.selectedTowerLevel === 'upgrade') {
+            towerCost = CONFIG.TOWER_UPGRADE_COST;
+        } else if (this.selectedTowerLevel === 'premium') {
+            towerCost = CONFIG.TOWER_PREMIUM_COST;
+        }
+        
+        if (this.selectedTowerPosition && this.coins >= towerCost) {
             this.drawTowerPreview(this.selectedTowerPosition.gridX, this.selectedTowerPosition.gridY);
         }
 
@@ -1731,17 +1859,28 @@ class Game {
         this.ctx.stroke();
 
         // Desenha preview da torre (sprite transparente mostrando onde será colocada)
-        // Usa tower1 como preview padrão
+        // Cria uma torre temporária para desenhar o preview com o nível correto
+        const previewTower = new Tower(gridX, gridY, 1, this.selectedTowerLevel);
         const tower = IMAGES.tower1;
         const drawX = gridX * CONFIG.CELL_SIZE;
         const drawY = gridY * CONFIG.CELL_SIZE;
         
         if (tower) {
+            // Escolhe qual animação usar baseado no nível selecionado
+            let animationArray = null;
+            if (this.selectedTowerLevel === 'premium') {
+                animationArray = tower.animationPremium;
+            } else if (this.selectedTowerLevel === 'upgrade') {
+                animationArray = tower.animationUpgrade;
+            } else {
+                animationArray = tower.animationBasic;
+            }
+            
             // Tenta usar o primeiro frame da animação (se disponível)
-            if (tower.animation && tower.animation.length > 0 && tower.animation[0]) {
+            if (animationArray && animationArray.length > 0 && animationArray[0]) {
                 // Usa o primeiro frame da animação com transparência
                 this.ctx.globalAlpha = 0.5; // 50% de opacidade (semi-transparente)
-                this.ctx.drawImage(tower.animation[0], drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                this.ctx.drawImage(animationArray[0], drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
                 this.ctx.globalAlpha = 1.0; // Volta a opacidade normal (100%)
             } else if (tower.throwerBack && tower.throwerBack.basic) {
                 // Fallback: usa os componentes separados se a animação não estiver disponível
@@ -1786,6 +1925,73 @@ class Game {
         document.getElementById('coins').textContent = this.coins;
         // Atualiza a wave atual no elemento HTML
         document.getElementById('wave').textContent = this.wave;
+    }
+    
+    /**
+     * Atualiza a seleção visual no menu de compra de torres
+     */
+    updateTowerShopSelection() {
+        // Remove a classe 'selected' de todas as opções
+        const allOptions = document.querySelectorAll('.tower-option');
+        allOptions.forEach(option => option.classList.remove('selected'));
+        
+        // Adiciona a classe 'selected' à opção escolhida
+        const selectedOption = document.getElementById(`tower-${this.selectedTowerLevel}`);
+        if (selectedOption) {
+            selectedOption.classList.add('selected');
+        }
+    }
+    
+    /**
+     * Desenha os previews das torres no menu de compra
+     */
+    drawTowerShopPreviews() {
+        if (!this.imagesLoaded) return;
+        
+        const tower = IMAGES.tower1;
+        if (!tower) return;
+        
+        // Preview Basic
+        const canvasBasic = document.getElementById('preview-basic');
+        if (canvasBasic && tower.animationBasic && tower.animationBasic[0]) {
+            const ctxBasic = canvasBasic.getContext('2d');
+            canvasBasic.width = 60;
+            canvasBasic.height = 60;
+            ctxBasic.drawImage(tower.animationBasic[0], 0, 0, 60, 60);
+        }
+        
+        // Preview Upgrade
+        const canvasUpgrade = document.getElementById('preview-upgrade');
+        if (canvasUpgrade && tower.animationUpgrade && tower.animationUpgrade[0]) {
+            const ctxUpgrade = canvasUpgrade.getContext('2d');
+            canvasUpgrade.width = 60;
+            canvasUpgrade.height = 60;
+            ctxUpgrade.drawImage(tower.animationUpgrade[0], 0, 0, 60, 60);
+        }
+        
+        // Preview Premium
+        const canvasPremium = document.getElementById('preview-premium');
+        if (canvasPremium && tower.animationPremium && tower.animationPremium[0]) {
+            const ctxPremium = canvasPremium.getContext('2d');
+            canvasPremium.width = 60;
+            canvasPremium.height = 60;
+            ctxPremium.drawImage(tower.animationPremium[0], 0, 0, 60, 60);
+        }
+        
+        // Atualiza os custos exibidos no menu de compra
+        this.updateTowerShopCosts();
+    }
+    
+    /**
+     * Atualiza os custos exibidos no menu de compra de torres
+     */
+    updateTowerShopCosts() {
+        const costBasic = document.getElementById('cost-basic');
+        const costUpgrade = document.getElementById('cost-upgrade');
+        const costPremium = document.getElementById('cost-premium');
+        if (costBasic) costBasic.textContent = `${CONFIG.TOWER_BASIC_COST} moedas`;
+        if (costUpgrade) costUpgrade.textContent = `${CONFIG.TOWER_UPGRADE_COST} moedas`;
+        if (costPremium) costPremium.textContent = `${CONFIG.TOWER_PREMIUM_COST} moedas`;
     }
 
     /**
@@ -1841,6 +2047,9 @@ class Game {
         
         // Atualiza o HUD
         this.updateHUD();
+        
+        // Atualiza os custos no menu de compra
+        this.updateTowerShopCosts();
         
         // Reinicia o loop
         this.lastTime = performance.now();
@@ -1986,7 +2195,9 @@ class MenuManager {
         // Cria objeto com todas as opções configuráveis
         const options = {
             MAX_WAVES: CONFIG.MAX_WAVES,
-            TOWER_COST: CONFIG.TOWER_COST,
+            TOWER_BASIC_COST: CONFIG.TOWER_BASIC_COST,
+            TOWER_UPGRADE_COST: CONFIG.TOWER_UPGRADE_COST,
+            TOWER_PREMIUM_COST: CONFIG.TOWER_PREMIUM_COST,
             ENEMY_REWARD: CONFIG.ENEMY_REWARD,
             TOWER_RANGE: CONFIG.TOWER_RANGE,
             TOWER_DAMAGE: CONFIG.TOWER_DAMAGE,
@@ -2018,7 +2229,9 @@ class MenuManager {
     updateOptionsUI() {
         // Atualiza cada input com o valor atual do CONFIG
         document.getElementById('optMaxWaves').value = CONFIG.MAX_WAVES;
-        document.getElementById('optTowerCost').value = CONFIG.TOWER_COST;
+        document.getElementById('optTowerBasicCost').value = CONFIG.TOWER_BASIC_COST;
+        document.getElementById('optTowerUpgradeCost').value = CONFIG.TOWER_UPGRADE_COST;
+        document.getElementById('optTowerPremiumCost').value = CONFIG.TOWER_PREMIUM_COST;
         document.getElementById('optEnemyReward').value = CONFIG.ENEMY_REWARD;
         document.getElementById('optTowerRange').value = CONFIG.TOWER_RANGE;
         document.getElementById('optTowerDamage').value = CONFIG.TOWER_DAMAGE;
@@ -2039,7 +2252,9 @@ class MenuManager {
      */
     updateOptionValues() {
         document.getElementById('optMaxWavesValue').textContent = CONFIG.MAX_WAVES;
-        document.getElementById('optTowerCostValue').textContent = CONFIG.TOWER_COST;
+        document.getElementById('optTowerBasicCostValue').textContent = CONFIG.TOWER_BASIC_COST;
+        document.getElementById('optTowerUpgradeCostValue').textContent = CONFIG.TOWER_UPGRADE_COST;
+        document.getElementById('optTowerPremiumCostValue').textContent = CONFIG.TOWER_PREMIUM_COST;
         document.getElementById('optEnemyRewardValue').textContent = CONFIG.ENEMY_REWARD;
         document.getElementById('optTowerRangeValue').textContent = CONFIG.TOWER_RANGE;
         document.getElementById('optTowerDamageValue').textContent = CONFIG.TOWER_DAMAGE;
@@ -2058,7 +2273,9 @@ class MenuManager {
     readOptionsFromUI() {
         // Lê cada valor do input e aplica ao CONFIG
         CONFIG.MAX_WAVES = parseInt(document.getElementById('optMaxWaves').value) || 10;
-        CONFIG.TOWER_COST = parseInt(document.getElementById('optTowerCost').value) || 50;
+        CONFIG.TOWER_BASIC_COST = parseInt(document.getElementById('optTowerBasicCost').value) || 50;
+        CONFIG.TOWER_UPGRADE_COST = parseInt(document.getElementById('optTowerUpgradeCost').value) || 500;
+        CONFIG.TOWER_PREMIUM_COST = parseInt(document.getElementById('optTowerPremiumCost').value) || 1000;
         CONFIG.ENEMY_REWARD = parseInt(document.getElementById('optEnemyReward').value) || 10;
         CONFIG.TOWER_RANGE = parseInt(document.getElementById('optTowerRange').value) || 100;
         CONFIG.TOWER_DAMAGE = parseInt(document.getElementById('optTowerDamage').value) || 25;

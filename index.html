@@ -42,11 +42,25 @@
                     <span class="option-value" id="optMaxWavesValue">10</span>
                 </div>
 
-                <!-- Tower Cost -->
+                <!-- Tower Basic Cost -->
                 <div class="option-item">
-                    <label for="optTowerCost">Custo da Torre:</label>
-                    <input type="number" id="optTowerCost" min="10" max="500" value="50">
-                    <span class="option-value" id="optTowerCostValue">50</span>
+                    <label for="optTowerBasicCost">Custo Torre Basic:</label>
+                    <input type="number" id="optTowerBasicCost" min="10" max="1000" value="50">
+                    <span class="option-value" id="optTowerBasicCostValue">50</span>
+                </div>
+
+                <!-- Tower Upgrade Cost -->
+                <div class="option-item">
+                    <label for="optTowerUpgradeCost">Custo Torre Upgrade:</label>
+                    <input type="number" id="optTowerUpgradeCost" min="10" max="2000" value="500">
+                    <span class="option-value" id="optTowerUpgradeCostValue">500</span>
+                </div>
+
+                <!-- Tower Premium Cost -->
+                <div class="option-item">
+                    <label for="optTowerPremiumCost">Custo Torre Premium:</label>
+                    <input type="number" id="optTowerPremiumCost" min="10" max="5000" value="1000">
+                    <span class="option-value" id="optTowerPremiumCostValue">1000</span>
                 </div>
 
                 <!-- Enemy Reward -->
@@ -155,12 +169,59 @@
                 </div>
             </div>
 
-            <!-- Canvas do jogo -->
-            <canvas id="gameCanvas"></canvas>
+            <!-- Container do jogo e menu de compra -->
+            <div class="game-container">
+                <!-- Canvas do jogo -->
+                <canvas id="gameCanvas"></canvas>
+
+                <!-- Menu de Compra de Torres (lateral) -->
+                <div class="tower-shop">
+                    <h3 class="shop-title">Comprar Torre</h3>
+                    
+                    <!-- Torre Basic -->
+                    <div class="tower-option" id="tower-basic">
+                        <div class="tower-preview">
+                            <canvas id="preview-basic" class="tower-preview-canvas"></canvas>
+                        </div>
+                        <div class="tower-info">
+                            <h4>Torre Basic</h4>
+                            <p class="tower-cost" id="cost-basic">50 moedas</p>
+                            <p class="tower-stats">Velocidade: Normal</p>
+                            <p class="tower-stats">Projéteis: 1</p>
+                        </div>
+                    </div>
+
+                    <!-- Torre Upgrade -->
+                    <div class="tower-option" id="tower-upgrade">
+                        <div class="tower-preview">
+                            <canvas id="preview-upgrade" class="tower-preview-canvas"></canvas>
+                        </div>
+                        <div class="tower-info">
+                            <h4>Torre Upgrade</h4>
+                            <p class="tower-cost" id="cost-upgrade">500 moedas</p>
+                            <p class="tower-stats">Velocidade: 2x</p>
+                            <p class="tower-stats">Projéteis: 1</p>
+                        </div>
+                    </div>
+
+                    <!-- Torre Premium -->
+                    <div class="tower-option" id="tower-premium">
+                        <div class="tower-preview">
+                            <canvas id="preview-premium" class="tower-preview-canvas"></canvas>
+                        </div>
+                        <div class="tower-info">
+                            <h4>Torre Premium</h4>
+                            <p class="tower-cost" id="cost-premium">1000 moedas</p>
+                            <p class="tower-stats">Velocidade: 2x</p>
+                            <p class="tower-stats">Projéteis: 2</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Instruções -->
             <div class="instructions">
-                <p>Clique numa célula vazia para colocar uma torre</p>
+                <p>Selecione uma torre e clique numa célula vazia para colocá-la</p>
             </div>
         </div>
     </div>
