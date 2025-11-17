@@ -5,22 +5,33 @@
     box-sizing: border-box;
 }
 
+/* Carrega a fonte local */
+@font-face {
+    font-family: "8-bit-limit";
+    src: url('assets/fonts/8-bit-limit/8bitlimr.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: "8-bit-limit", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
     background: url('assets/background.jpg') center center / cover no-repeat fixed;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
+    cursor: url('assets/mouseHand.png') 10 10, auto; /* Custom cursor (20x20px, hotspot at center) */
 }
 
 .container {
-    background: rgba(255, 255, 255, 0.95);
+    background: transparent;
     border-radius: 15px;
     padding: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    max-width: 1200px;
+    max-width: 1800px;
     width: 100%;
 }
 
@@ -29,6 +40,78 @@ body {
     display: flex;
     gap: 20px;
     align-items: flex-start;
+}
+
+/* Debug Screen (Left Side) */
+.debug-screen {
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 10px;
+    padding: 15px;
+    min-width: 200px;
+    max-width: 200px;
+    color: #ecf0f1;
+    font-size: 12px;
+    border: 2px solid #34495e;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    display: none; /* Hidden by default */
+}
+
+.debug-title {
+    font-family: "8-bit-limit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 20px;
+    color: #f39c12;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    border-bottom: 2px solid #34495e;
+    padding-bottom: 8px;
+}
+
+.debug-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.debug-section {
+    background: rgba(52, 73, 94, 0.5);
+    border-radius: 5px;
+    padding: 8px;
+    border-left: 3px solid #3498db;
+}
+
+.debug-section-title {
+    font-size: 13px;
+    color: #3498db;
+    margin-bottom: 6px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.debug-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debug-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.debug-label {
+    color: #bdc3c7;
+    font-weight: normal;
+}
+
+.debug-value {
+    color: #2ecc71;
+    font-weight: bold;
+    font-family: "8-bit-limit", sans-serif;
 }
 
 /* Menu de Compra de Torres (lateral) */
@@ -41,9 +124,12 @@ body {
 }
 
 .shop-title {
+    font-family: "8-bit-limit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
     text-align: center;
     margin-bottom: 20px;
-    font-size: 24px;
+    font-size: 28px;
     color: #f39c12;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -54,7 +140,7 @@ body {
     border-radius: 10px;
     padding: 15px;
     margin-bottom: 15px;
-    cursor: pointer;
+    cursor: url('assets/mouseHand.png') 10 10, pointer;
     transition: all 0.3s;
 }
 
@@ -63,12 +149,34 @@ body {
     border-color: #f39c12;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    cursor: url('assets/mouseHandClick.png') 10 10, pointer;
 }
 
 .tower-option.selected {
     background: #16a085;
     border-color: #f39c12;
     box-shadow: 0 0 15px rgba(243, 156, 18, 0.5);
+}
+
+.tower-option.unaffordable {
+    opacity: 0.5;
+    background: #1a252f;
+    border-color: #7f8c8d;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.tower-option.unaffordable:hover {
+    background: #1a252f;
+    border-color: #7f8c8d;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.tower-option.unaffordable .tower-cost {
+    color: #e74c3c;
+    text-decoration: line-through;
 }
 
 .tower-preview {
@@ -80,25 +188,26 @@ body {
 .tower-preview-canvas {
     width: 60px;
     height: 60px;
-    background: rgba(0, 0, 0, 0.3);
     border-radius: 5px;
 }
 
 .tower-info h4 {
     margin: 0 0 8px 0;
-    font-size: 18px;
+    font-size: 16px;
     color: #f39c12;
+    font-weight: 600;
+    text-align: center;
 }
 
 .tower-cost {
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 14px;
+    font-weight: 600;
     color: #f39c12;
     margin: 5px 0;
 }
 
 .tower-stats {
-    font-size: 12px;
+    font-size: 11px;
     margin: 3px 0;
     color: #ecf0f1;
     opacity: 0.9;
@@ -107,10 +216,11 @@ body {
 /* HUD - Interface do utilizador */
 .hud {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
     background: #2c3e50;
     color: white;
-    padding: 15px;
+    padding: 15px 20px;
     border-radius: 10px;
     margin-bottom: 15px;
     font-size: 18px;
@@ -118,19 +228,35 @@ body {
 
 .hud-item {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+}
+
+.hud-item.hud-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+.hud-icon {
+    width: 28px;
+    height: 28px;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
 }
 
 .hud-label {
-    font-size: 14px;
+    font-size: 24px;
     opacity: 0.8;
+    font-weight: 500;
 }
 
 .hud-value {
     font-size: 24px;
-    font-weight: bold;
+    font-weight: 600;
     color: #f39c12;
 }
 
@@ -141,7 +267,7 @@ body {
     border-radius: 10px;
     background: #ecf0f1;
     margin: 0 auto;
-    cursor: crosshair;
+    cursor: url('assets/mouseHand.png') 10 10, crosshair; /* Custom cursor for game canvas */
 }
 
 /* Instruções */
@@ -149,7 +275,8 @@ body {
     text-align: center;
     margin-top: 15px;
     color: #34495e;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 500;
 }
 
 /* Efeito hover no canvas */
@@ -200,8 +327,8 @@ body {
 }
 
 .initial-menu-bg {
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 90%;
+    max-height: 90%;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -213,7 +340,7 @@ body {
     position: absolute;
     background: transparent;
     border: none;
-    cursor: pointer;
+    cursor: url('assets/mouseHand.png') 10 10, pointer;
     z-index: 10;
     transition: opacity 0.2s;
 }
@@ -221,12 +348,14 @@ body {
 .initial-menu-btn:hover {
     opacity: 0.8;
     background: rgba(255, 255, 255, 0.1) !important;
+    cursor: url('assets/mouseHandClick.png') 10 10, pointer;
 }
 
 /* Button positions will be calculated dynamically by JavaScript */
 .btn-play-area,
 .btn-options-area {
     /* Positions set by JavaScript based on image scale */
+    position: absolute;
 }
 
 .menu-canvas {
@@ -246,6 +375,9 @@ body {
 }
 
 .game-title {
+    font-family: "8-bit-limit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
     font-size: 48px;
     color: #2c3e50;
     margin-bottom: 30px;
@@ -253,7 +385,10 @@ body {
 }
 
 .menu-title {
-    font-size: 36px;
+    font-family: "8-bit-limit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 40px;
     color: #2c3e50;
     margin-bottom: 30px;
 }
@@ -270,11 +405,11 @@ body {
     color: white;
     border: none;
     padding: 15px 30px;
-    font-size: 20px;
+    font-size: 18px;
     border-radius: 10px;
-    cursor: pointer;
+    cursor: url('assets/mouseHand.png') 10 10, pointer;
     transition: all 0.3s;
-    font-weight: bold;
+    font-weight: 600;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     min-width: 200px;
@@ -282,6 +417,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: "8-bit-limit", sans-serif;
 }
 
 .menu-btn.gui-btn {
@@ -292,6 +428,7 @@ body {
     background: #2980b9;
     transform: translateY(-2px);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+    cursor: url('assets/mouseHandClick.png') 10 10, pointer;
 }
 
 .menu-btn.gui-btn:active {
@@ -334,9 +471,10 @@ body {
 }
 
 .option-item label {
-    font-weight: bold;
+    font-weight: 600;
     color: #2c3e50;
     grid-column: 1 / -1;
+    font-family: "8-bit-limit", sans-serif;
 }
 
 .option-item input[type="number"],
@@ -344,20 +482,26 @@ body {
     padding: 8px;
     border: 2px solid #bdc3c7;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 14px;
     width: 100%;
+    font-family: "8-bit-limit", sans-serif;
 }
 
 .option-item input[type="range"] {
-    cursor: pointer;
+    cursor: url('assets/mouseHand.png') 10 10, pointer;
+}
+
+.option-item input[type="range"]:hover {
+    cursor: url('assets/mouseHandClick.png') 10 10, pointer;
 }
 
 .option-value {
-    font-weight: bold;
+    font-weight: 600;
     color: #3498db;
-    font-size: 18px;
+    font-size: 16px;
     min-width: 60px;
     text-align: right;
+    font-family: "8-bit-limit", sans-serif;
 }
 
 .options-buttons {
@@ -373,26 +517,33 @@ body {
 
 /* Botões no HUD */
 .hud-btn {
-    background: #e74c3c;
-    color: white;
-    border: none;
+    background: #f4e4bc; /* Cor de pergaminho */
+    color: #3d2817; /* Texto castanho escuro */
+    border: 3px solid #5d4037; /* Borda castanho escuro */
     padding: 8px 15px;
-    font-size: 14px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin: 0 5px;
+    font-size: 13px;
+    border-radius: 0; /* Remove border-radius para estilo pixelizado */
+    cursor: url('assets/mouseHand.png') 10 10, pointer;
+    transition: all 0.1s;
+    margin: 0;
+    font-family: "8-bit-limit", sans-serif;
+    font-weight: 600;
+    image-rendering: pixelated; /* Estilo pixelizado */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    box-shadow: 
+        inset -2px -2px 0px #8d6e63,
+        inset 2px 2px 0px #fff8e1,
+        2px 2px 0px #3d2817; /* Sombra pixelizada */
 }
 
 .hud-btn:hover {
-    background: #c0392b;
+    background: #e8d5a3; /* Pergaminho mais claro no hover */
+    cursor: url('assets/mouseHandClick.png') 10 10, pointer;
+    box-shadow: 
+        inset -2px -2px 0px #6d4c41,
+        inset 2px 2px 0px #fff8e1,
+        1px 1px 0px #3d2817; /* Sombra menor no hover */
 }
 
-#btnBackToMainMenu {
-    background: #95a5a6;
-}
-
-#btnBackToMainMenu:hover {
-    background: #7f8c8d;
-}
 

@@ -148,18 +148,21 @@
             <!-- HUD - Game Information -->
             <div class="hud">
                 <div class="hud-item">
-                    <span class="hud-label">Village Life:</span>
+                    <img src="assets/GUI/PNG/heart.png" alt="Heart" class="hud-icon">
+                    <span class="hud-label">Village Health</span>
                     <span id="village-life" class="hud-value">100</span>
                 </div>
                 <div class="hud-item">
-                    <span class="hud-label">Coins:</span>
+                    <img src="assets/GUI/PNG/coin.png" alt="Coin" class="hud-icon">
+                    <span class="hud-label">Coins</span>
                     <span id="coins" class="hud-value">200</span>
                 </div>
                 <div class="hud-item">
-                    <span class="hud-label">Wave:</span>
+                    <img src="assets/GUI/PNG/wave.png" alt="Wave" class="hud-icon">
+                    <span class="hud-label">Wave</span>
                     <span id="wave" class="hud-value">1</span>
                 </div>
-                <div class="hud-item">
+                <div class="hud-item hud-buttons">
                     <button id="btnPause" class="hud-btn">Pause</button>
                     <button id="btnBackToMainMenu" class="hud-btn">Menu</button>
                 </div>
@@ -167,12 +170,94 @@
 
             <!-- Game Container and Tower Shop -->
             <div class="game-container">
+                <!-- Debug Screen (Left Side) -->
+                <div id="debugScreen" class="debug-screen">
+                    <h3 class="debug-title">Debug Stats</h3>
+                    <div class="debug-content">
+                        <div class="debug-section">
+                            <h4 class="debug-section-title">Tower Stats</h4>
+                            <div class="debug-item">
+                                <span class="debug-label">Range:</span>
+                                <span class="debug-value" id="debugTowerRange">50</span>
+                            </div>
+                            <div class="debug-item">
+                                <span class="debug-label">Damage:</span>
+                                <span class="debug-value" id="debugTowerDamage">25</span>
+                            </div>
+                            <div class="debug-item">
+                                <span class="debug-label">Fire Rate:</span>
+                                <span class="debug-value" id="debugTowerFireRate">1000</span>
+                            </div>
+                        </div>
+                        
+                        <div class="debug-section">
+                            <h4 class="debug-section-title">Tower Costs</h4>
+                            <div class="debug-item">
+                                <span class="debug-label">Basic:</span>
+                                <span class="debug-value" id="debugTowerBasicCost">50</span>
+                            </div>
+                            <div class="debug-item">
+                                <span class="debug-label">Upgrade:</span>
+                                <span class="debug-value" id="debugTowerUpgradeCost">500</span>
+                            </div>
+                            <div class="debug-item">
+                                <span class="debug-label">Premium:</span>
+                                <span class="debug-value" id="debugTowerPremiumCost">1000</span>
+                            </div>
+                        </div>
+                        
+                        <div class="debug-section">
+                            <h4 class="debug-section-title">Enemy Stats</h4>
+                            <div class="debug-item">
+                                <span class="debug-label">Speed:</span>
+                                <span class="debug-value" id="debugEnemySpeed">1.0</span>
+                            </div>
+                            <div class="debug-item">
+                                <span class="debug-label">Health:</span>
+                                <span class="debug-value" id="debugEnemyHealth">50</span>
+                            </div>
+                            <div class="debug-item">
+                                <span class="debug-label">Reward:</span>
+                                <span class="debug-value" id="debugEnemyReward">10</span>
+                            </div>
+                        </div>
+                        
+                        <div class="debug-section">
+                            <h4 class="debug-section-title">Wave Settings</h4>
+                            <div class="debug-item">
+                                <span class="debug-label">Max Waves:</span>
+                                <span class="debug-value" id="debugMaxWaves">10</span>
+                            </div>
+                            <div class="debug-item">
+                                <span class="debug-label">Per Wave:</span>
+                                <span class="debug-value" id="debugEnemiesPerWave">5</span>
+                            </div>
+                            <div class="debug-item">
+                                <span class="debug-label">Multiplier:</span>
+                                <span class="debug-value" id="debugWaveMultiplier">1.2</span>
+                            </div>
+                        </div>
+                        
+                        <div class="debug-section">
+                            <h4 class="debug-section-title">Game State</h4>
+                            <div class="debug-item">
+                                <span class="debug-label">Coins:</span>
+                                <span class="debug-value" id="debugCoins">200</span>
+                            </div>
+                            <div class="debug-item">
+                                <span class="debug-label">Village Life:</span>
+                                <span class="debug-value" id="debugVillageLife">100</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Game Canvas -->
                 <canvas id="gameCanvas"></canvas>
 
                 <!-- Tower Shop (Sidebar) -->
                 <div class="tower-shop">
-                    <h3 class="shop-title">Buy Tower</h3>
+                    <h3 class="shop-title">Towers</h3>
                     
                     <!-- Basic Tower -->
                     <div class="tower-option" id="tower-basic">
@@ -213,11 +298,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Instructions -->
-            <div class="instructions">
-                <p>Select a tower and click on an empty cell to place it</p>
             </div>
         </div>
     </div>

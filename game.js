@@ -62,6 +62,7 @@ const IMAGES = {
     iconCoin: null,          // Ícone de moeda
     iconHeart: null,         // Ícone de vida
     iconWave: null,          // Ícone de wave
+    winCoin: null,           // Moeda que aparece quando inimigo morre
     
     // Monstros - Sprites de caminhada (Walking) e morte (Dying)
     // Cada monstro tem suas animações
@@ -212,6 +213,7 @@ async function loadAllImages() {
             loadImage('buttons', 'assets/GUI/PNG/Buttons.png'),
             loadImage('settings', 'assets/GUI/PNG/Settings.png'),
             loadImage('icons', 'assets/GUI/PNG/Icons.png'),
+            loadImage('winCoin', 'assets/GUI/PNG/winCoin.png'),
             
             // Torres novas (tower1 e tower2) - componentes separados
             // Tower 1
@@ -321,8 +323,6 @@ async function loadAllImages() {
             loadAnimation('monster10Walking', 'assets/monsters/Monster_10/PNG/PNG Sequences/Walking', 'Walking'),
             loadAnimation('monster10Dying', 'assets/monsters/Monster_10/PNG/PNG Sequences/Dying', 'Dying'),
         ]);
-        
-        console.log('✅ Todas as imagens e animações carregadas!');
         
         // Organiza as torres novas no formato correto
         organizeTowerSprites();
@@ -497,7 +497,6 @@ function organizeTowerSprites() {
         console.log('✓ Tower 2 organizada');
     }
     
-    console.log('✅ Sprites das torres organizados!');
 }
 
 /**
@@ -588,7 +587,6 @@ function processGUISprites() {
         console.warn('⚠ Icons.png não carregou - ícones usarão fallback');
     }
     
-    console.log('✅ Sprite sheets processados!');
 }
 
 // ============================================
@@ -645,7 +643,7 @@ const CONFIG = {
     TOWER_PREMIUM_COST: 1000, // Premium tower cost
     
     // Enemy settings (can be changed in options)
-    ENEMY_SIZE: 30,
+    ENEMY_SIZE: 45, // Aumentado de 30 para 45 (50% maior) - apenas tamanho visual, não afeta o canvas
     ENEMY_SPEED: 1.0,        // Base speed (pixels per frame) - 1.0 is balanced
     ENEMY_HEALTH: 50,        // Initial health
     
@@ -821,7 +819,7 @@ class Enemy {
         
         // Sistema de animação
         this.animationFrame = 0; // Frame atual da animação de caminhada
-        this.animationSpeed = 0.15; // Velocidade da animação (frames por update)
+        this.animationSpeed = 2; // Velocidade da animação (frames por update) - aumentado para animação mais rápida
         this.isDying = false; // Se está executando animação de morte
         this.dyingFrame = 0; // Frame atual da animação de morte
         this.dyingDuration = 0; // Tempo que a animação de morte está rodando
@@ -834,7 +832,7 @@ class Enemy {
         // Se está morrendo, apenas atualiza animação de morte
         if (this.isDying) {
             this.dyingDuration++;
-            this.dyingFrame = Math.floor(this.dyingDuration * 0.3); // Velocidade da animação de morte
+            this.dyingFrame = Math.floor(this.dyingDuration * 0.6); // Velocidade da animação de morte - aumentado para animação mais rápida
             
             // Remove o inimigo após a animação de morte terminar
             if (this.dyingFrame >= 18) {
@@ -1188,7 +1186,11 @@ class Tower {
             if (this.isAnimating && animationArray && animationArray.length > 0) {
                 const frame = animationArray[this.animationFrame];
                 if (frame) {
-                    ctx.drawImage(frame, drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                    // Desenha a torre maior que a célula (1.5x) para melhor visualização
+                    const towerSize = CONFIG.CELL_SIZE * 1.5;
+                    const towerDrawX = this.x - towerSize / 2;
+                    const towerDrawY = this.y - towerSize / 2;
+                    ctx.drawImage(frame, towerDrawX, towerDrawY, towerSize, towerSize);
                 } else {
                     // Fallback se o frame não existe
                     this.drawFallback(ctx);
@@ -1196,8 +1198,11 @@ class Tower {
             } else {
                 // Se não está animando, usa o primeiro frame da animação como estado padrão
                 if (animationArray && animationArray.length > 0 && animationArray[0]) {
-                    // Usa o primeiro frame da animação como estado parado
-                    ctx.drawImage(animationArray[0], drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                    // Desenha a torre maior que a célula (1.5x) para melhor visualização
+                    const towerSize = CONFIG.CELL_SIZE * 1.5;
+                    const towerDrawX = this.x - towerSize / 2;
+                    const towerDrawY = this.y - towerSize / 2;
+                    ctx.drawImage(animationArray[0], towerDrawX, towerDrawY, towerSize, towerSize);
                 } else {
                     // Fallback: se a animação não estiver disponível, usa os componentes separados
                     // Desenha as 3 camadas na ordem correta (de trás para frente)
@@ -1207,7 +1212,11 @@ class Tower {
                         ? tower.throwerBack.upgrade 
                         : tower.throwerBack.basic;
                     if (throwerBack) {
-                        ctx.drawImage(throwerBack, drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                        // Desenha componentes maiores que a célula (1.5x) para melhor visualização
+                        const towerSize = CONFIG.CELL_SIZE * 1.5;
+                        const towerDrawX = this.x - towerSize / 2;
+                        const towerDrawY = this.y - towerSize / 2;
+                        ctx.drawImage(throwerBack, towerDrawX, towerDrawY, towerSize, towerSize);
                     }
                     
                     // 2. base (no meio)
@@ -1217,7 +1226,7 @@ class Tower {
                             ? tower.base.upgrade 
                             : tower.base.basic);
                     if (base) {
-                        ctx.drawImage(base, drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                        ctx.drawImage(base, towerDrawX, towerDrawY, towerSize, towerSize);
                     }
                     
                     // 3. throwerFront (na frente)
@@ -1225,7 +1234,7 @@ class Tower {
                         ? tower.throwerFront.upgrade 
                         : tower.throwerFront.basic;
                     if (throwerFront) {
-                        ctx.drawImage(throwerFront, drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                        ctx.drawImage(throwerFront, towerDrawX, towerDrawY, towerSize, towerSize);
                     }
                 }
             }
@@ -1271,6 +1280,92 @@ class Tower {
 }
 
 // ============================================
+// CLASSE COINPARTICLE (Partícula de Moeda)
+// ============================================
+
+/**
+ * Partícula de moeda que aparece quando um inimigo morre
+ * Faz uma animação de salto e desvanecimento
+ */
+class CoinParticle {
+    /**
+     * Cria uma nova partícula de moeda
+     * @param {number} x - Posição X inicial (onde o inimigo morreu)
+     * @param {number} y - Posição Y inicial (onde o inimigo morreu)
+     */
+    constructor(x, y) {
+        this.startX = x; // Posição X inicial
+        this.startY = y; // Posição Y inicial
+        this.x = x; // Posição X atual
+        this.y = y; // Posição Y atual
+        
+        // Animação de salto
+        this.velocityY = -8; // Velocidade vertical inicial (negativa = para cima)
+        this.gravity = 0.5; // Gravidade que puxa a moeda para baixo
+        this.life = 0; // Tempo de vida da partícula (em frames)
+        this.maxLife = 60; // Duração total da animação (60 frames = ~1 segundo a 60fps)
+        
+        this.active = true; // Se a partícula ainda está ativa
+    }
+    
+    /**
+     * Atualiza a posição e animação da partícula
+     */
+    update() {
+        if (!this.active) return;
+        
+        // Aplica gravidade (velocidade aumenta para baixo)
+        this.velocityY += this.gravity;
+        
+        // Move a partícula
+        this.y += this.velocityY;
+        
+        // Pequeno movimento horizontal aleatório para dar mais naturalidade
+        this.x += (Math.random() - 0.5) * 0.5;
+        
+        // Incrementa o tempo de vida
+        this.life++;
+        
+        // Remove a partícula quando a animação termina
+        if (this.life >= this.maxLife) {
+            this.active = false;
+        }
+    }
+    
+    /**
+     * Desenha a partícula no canvas
+     * @param {CanvasRenderingContext2D} ctx - Contexto do canvas
+     */
+    draw(ctx) {
+        if (!this.active || !IMAGES.winCoin) return;
+        
+        // Calcula a opacidade (fade out - começa em 1.0 e vai para 0.0)
+        const opacity = 1 - (this.life / this.maxLife);
+        
+        // Calcula o tamanho (pode aumentar um pouco durante o salto)
+        const size = (32 + Math.sin(this.life * 0.2) * 4) * 0.75;
+        
+        // Salva o estado do canvas
+        ctx.save();
+        
+        // Aplica opacidade
+        ctx.globalAlpha = opacity;
+        
+        // Desenha a imagem da moeda
+        ctx.drawImage(
+            IMAGES.winCoin,
+            this.x - size / 2,
+            this.y - size / 2,
+            size,
+            size
+        );
+        
+        // Restaura o estado do canvas
+        ctx.restore();
+    }
+}
+
+// ============================================
 // CLASSE GAME (Jogo Principal)
 // ============================================
 
@@ -1297,17 +1392,23 @@ class Game {
         this.gameOver = false; // Se o jogo terminou
         this.imagesLoaded = false; // Se as imagens foram carregadas
         this.paused = false; // Se o jogo está pausado
+        this.animationFrameId = null; // ID do requestAnimationFrame atual (para poder cancelar)
 
         // Arrays que guardam todos os objetos do jogo
         this.towers = []; // Todas as torres colocadas
         this.enemies = []; // Todos os inimigos no mapa
         this.projectiles = []; // Todos os projéteis voando
+        this.coinParticles = []; // Partículas de moeda que aparecem quando inimigos morrem
 
         // Estado das waves (ondas de inimigos)
         this.waveInProgress = false; // Se uma wave está acontecendo
         this.wavePauseStart = 0; // Quando começou a pausa entre waves
         this.enemiesInWave = 0; // Quantos inimigos devem aparecer nesta wave
         this.enemiesSpawned = 0; // Quantos inimigos já foram criados nesta wave
+        this.lastSpawnTime = 0; // Última vez que um inimigo foi spawnado
+        this.waveSpeed = CONFIG.ENEMY_SPEED; // Velocidade dos inimigos na wave atual
+        this.waveHealth = CONFIG.ENEMY_HEALTH; // Vida dos inimigos na wave atual
+        this.currentMonsterType = 1; // Tipo de monstro da wave atual
 
         // Caminho que os inimigos vão seguir (array de pontos {x, y})
         this.path = this.generatePath();
@@ -1327,16 +1428,8 @@ class Game {
      */
     async init() {
         // Mostra mensagem de carregamento
-        console.log('🔄 Carregando recursos...');
-        
         // Carrega todas as imagens
         this.imagesLoaded = await loadAllImages();
-        
-        if (this.imagesLoaded) {
-            console.log('✅ Jogo pronto!');
-        } else {
-            console.warn('⚠ Algumas imagens não carregaram. Continuando com fallbacks.');
-        }
         
         // Desenha os previews das torres no menu de compra
         this.drawTowerShopPreviews();
@@ -1346,6 +1439,9 @@ class Game {
         
         // Atualiza os custos no menu de compra (já é chamado em drawTowerShopPreviews, mas garantimos aqui também)
         this.updateTowerShopCosts();
+        
+        // Atualiza a tela de debug inicial
+        this.updateDebugScreen();
         
         // Inicia o loop do jogo (mesmo que algumas imagens não tenham carregado)
         this.lastTime = performance.now();
@@ -1566,8 +1662,15 @@ class Game {
         // Aumenta a vida dos inimigos baseado na dificuldade
         this.waveHealth = CONFIG.ENEMY_HEALTH * difficulty;
         
-        // Mostra no console qual wave começou e qual monstro está sendo usado
-        console.log(`🌊 Wave ${this.wave} iniciada! Usando Monster_${this.currentMonsterType}`);
+        // Reseta o tempo de spawn quando uma nova wave começa
+        this.lastSpawnTime = 0;
+        
+        // Debug: mostra stats de velocidade
+        console.log(`🌊 Wave ${this.wave} iniciada!`);
+        console.log(`   Monster: ${this.currentMonsterType}`);
+        console.log(`   Enemy Speed: ${this.waveSpeed.toFixed(2)} (Base: ${CONFIG.ENEMY_SPEED.toFixed(2)})`);
+        console.log(`   Enemy Health: ${this.waveHealth.toFixed(0)} (Base: ${CONFIG.ENEMY_HEALTH})`);
+        console.log(`   Enemies in wave: ${this.enemiesInWave}`);
     }
 
     /**
@@ -1606,9 +1709,12 @@ class Game {
             // Spawna inimigos gradualmente (um de cada vez)
             if (this.enemiesSpawned < this.enemiesInWave) {
                 const spawnInterval = 1000; // 1 segundo entre cada inimigo
-                // Se ainda não spawnou nenhum OU já passou o intervalo
-                if (this.enemiesSpawned === 0 || 
-                    currentTime - this.lastSpawnTime >= spawnInterval) {
+                // Se ainda não spawnou nenhum, inicializa o tempo
+                if (this.enemiesSpawned === 0) {
+                    this.lastSpawnTime = currentTime; // Inicializa o tempo no primeiro spawn
+                    this.spawnEnemy(); // Cria o primeiro inimigo imediatamente
+                } else if (currentTime - this.lastSpawnTime >= spawnInterval) {
+                    // Se já passou o intervalo, spawna o próximo
                     this.spawnEnemy(); // Cria um novo inimigo
                     this.lastSpawnTime = currentTime; // Atualiza o tempo
                 }
@@ -1622,7 +1728,6 @@ class Game {
                 this.waveInProgress = false; // Marca que a wave acabou
                 this.wavePauseStart = currentTime; // Inicia a pausa
                 
-                console.log(`✅ Wave ${this.wave} completada!`);
                 
                 // Verifica se completou todas as waves configuradas
                 if (this.wave >= CONFIG.MAX_WAVES) {
@@ -1668,6 +1773,9 @@ class Game {
             // Remove inimigos que terminaram a animação de morte
             // Condições: não está ativo, não chegou ao fim, não está morrendo
             if (!enemy.active && !enemy.reachedEnd && !enemy.isDying) {
+                // Cria uma partícula de moeda na posição onde o inimigo morreu
+                this.coinParticles.push(new CoinParticle(enemy.x, enemy.y));
+                
                 // Dá recompensa ao jogador por matar o inimigo
                 this.coins += CONFIG.ENEMY_REWARD;
                 this.updateHUD(); // Atualiza o HUD
@@ -1702,6 +1810,17 @@ class Game {
 
         // Remove projéteis que não estão mais ativos (atingiram o alvo ou perderam o alvo)
         this.projectiles = this.projectiles.filter(p => p.active);
+        
+        // Atualiza partículas de moeda
+        for (let i = this.coinParticles.length - 1; i >= 0; i--) {
+            const particle = this.coinParticles[i];
+            particle.update();
+            
+            // Remove partículas inativas
+            if (!particle.active) {
+                this.coinParticles.splice(i, 1);
+            }
+        }
     }
 
     /**
@@ -1754,6 +1873,11 @@ class Game {
                 projectile.draw(this.ctx);
             }
         }
+        
+        // Desenha todas as partículas de moeda
+        for (const particle of this.coinParticles) {
+            particle.draw(this.ctx);
+        }
     }
 
     /**
@@ -1773,8 +1897,11 @@ class Game {
                     // Usa o tile Ground 52 para o terreno principal
                     const img = IMAGES.ground52;
                     if (img) {
-                        // Desenha o tile de terreno na posição da célula
-                        this.ctx.drawImage(img, x, y, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                        // Desenha o tile de terreno maior que a célula (1.5x) para melhor visualização
+                        const tileSize = CONFIG.CELL_SIZE * 1.5;
+                        const tileX = x - (tileSize - CONFIG.CELL_SIZE) / 2;
+                        const tileY = y - (tileSize - CONFIG.CELL_SIZE) / 2;
+                        this.ctx.drawImage(img, tileX, tileY, tileSize, tileSize);
                     } else {
                         // Fallback: se a imagem não carregou, desenha cor de fundo sólida
                         this.ctx.fillStyle = '#ecf0f1'; // Cor cinza claro
@@ -1828,8 +1955,11 @@ class Game {
             const y = pathY;
             
             if (pathImg) {
-                // Se a imagem carregou, desenha o tile da estrada
-                this.ctx.drawImage(pathImg, x, y, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                // Desenha o tile da estrada maior que a célula (1.5x) para melhor visualização
+                const tileSize = CONFIG.CELL_SIZE * 1.5;
+                const tileX = x - (tileSize - CONFIG.CELL_SIZE) / 2;
+                const tileY = y - (tileSize - CONFIG.CELL_SIZE) / 2;
+                this.ctx.drawImage(pathImg, tileX, tileY, tileSize, tileSize);
             } else {
                 // Fallback: se a imagem não carregou, desenha cor de caminho
                 this.ctx.fillStyle = '#95a5a6'; // Cor cinza
@@ -1841,22 +1971,6 @@ class Game {
                 this.ctx.strokeRect(x, y, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
             }
         }
-
-        // Desenha a linha central do caminho (linha tracejada mostrando a direção)
-        this.ctx.strokeStyle = '#34495e'; // Cor azul escura
-        this.ctx.lineWidth = 2;
-        // Define o padrão de linha tracejada (10px linha, 5px espaço)
-        this.ctx.setLineDash([10, 5]);
-        this.ctx.beginPath();
-        // Começa no primeiro ponto do caminho
-        this.ctx.moveTo(this.path[0].x, this.path[0].y);
-        // Desenha linhas conectando todos os pontos do caminho
-        for (let i = 1; i < this.path.length; i++) {
-            this.ctx.lineTo(this.path[i].x, this.path[i].y);
-        }
-        this.ctx.stroke();
-        // Remove o padrão de linha tracejada (volta ao padrão sólido)
-        this.ctx.setLineDash([]);
     }
 
     /**
@@ -1899,21 +2013,29 @@ class Game {
             if (animationArray && animationArray.length > 0 && animationArray[0]) {
                 // Usa o primeiro frame da animação com transparência
                 this.ctx.globalAlpha = 0.5; // 50% de opacidade (semi-transparente)
-                this.ctx.drawImage(animationArray[0], drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                // Desenha preview da torre maior que a célula (1.5x) para melhor visualização
+                const previewTowerSize = CONFIG.CELL_SIZE * 1.5;
+                const previewTowerX = gridX * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2 - previewTowerSize / 2;
+                const previewTowerY = gridY * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2 - previewTowerSize / 2;
+                this.ctx.drawImage(animationArray[0], previewTowerX, previewTowerY, previewTowerSize, previewTowerSize);
                 this.ctx.globalAlpha = 1.0; // Volta a opacidade normal (100%)
             } else if (tower.throwerBack && tower.throwerBack.basic) {
                 // Fallback: usa os componentes separados se a animação não estiver disponível
                 this.ctx.globalAlpha = 0.5; // 50% de opacidade (semi-transparente)
                 
                 // Desenha as 3 camadas na ordem correta
+                // Desenha preview dos componentes maiores que a célula (1.5x) para melhor visualização
+                const previewTowerSize = CONFIG.CELL_SIZE * 1.5;
+                const previewTowerX = gridX * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2 - previewTowerSize / 2;
+                const previewTowerY = gridY * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2 - previewTowerSize / 2;
                 if (tower.throwerBack.basic) {
-                    this.ctx.drawImage(tower.throwerBack.basic, drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                    this.ctx.drawImage(tower.throwerBack.basic, previewTowerX, previewTowerY, previewTowerSize, previewTowerSize);
                 }
                 if (tower.base.basic) {
-                    this.ctx.drawImage(tower.base.basic, drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                    this.ctx.drawImage(tower.base.basic, previewTowerX, previewTowerY, previewTowerSize, previewTowerSize);
                 }
                 if (tower.throwerFront.basic) {
-                    this.ctx.drawImage(tower.throwerFront.basic, drawX, drawY, CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
+                    this.ctx.drawImage(tower.throwerFront.basic, previewTowerX, previewTowerY, previewTowerSize, previewTowerSize);
                 }
                 
                 this.ctx.globalAlpha = 1.0; // Volta a opacidade normal (100%)
@@ -1944,6 +2066,52 @@ class Game {
         document.getElementById('coins').textContent = this.coins;
         // Atualiza a wave atual no elemento HTML
         document.getElementById('wave').textContent = this.wave;
+        
+        // Atualiza a disponibilidade das torres no menu de compra
+        this.updateTowerShopAvailability();
+    }
+    
+    /**
+     * Atualiza a tela de debug com os stats atuais
+     */
+    updateDebugScreen() {
+        // Tower Stats
+        const debugTowerRange = document.getElementById('debugTowerRange');
+        const debugTowerDamage = document.getElementById('debugTowerDamage');
+        const debugTowerFireRate = document.getElementById('debugTowerFireRate');
+        if (debugTowerRange) debugTowerRange.textContent = CONFIG.TOWER_RANGE;
+        if (debugTowerDamage) debugTowerDamage.textContent = CONFIG.TOWER_DAMAGE;
+        if (debugTowerFireRate) debugTowerFireRate.textContent = CONFIG.TOWER_FIRE_RATE + 'ms';
+        
+        // Tower Costs
+        const debugTowerBasicCost = document.getElementById('debugTowerBasicCost');
+        const debugTowerUpgradeCost = document.getElementById('debugTowerUpgradeCost');
+        const debugTowerPremiumCost = document.getElementById('debugTowerPremiumCost');
+        if (debugTowerBasicCost) debugTowerBasicCost.textContent = CONFIG.TOWER_BASIC_COST;
+        if (debugTowerUpgradeCost) debugTowerUpgradeCost.textContent = CONFIG.TOWER_UPGRADE_COST;
+        if (debugTowerPremiumCost) debugTowerPremiumCost.textContent = CONFIG.TOWER_PREMIUM_COST;
+        
+        // Enemy Stats
+        const debugEnemySpeed = document.getElementById('debugEnemySpeed');
+        const debugEnemyHealth = document.getElementById('debugEnemyHealth');
+        const debugEnemyReward = document.getElementById('debugEnemyReward');
+        if (debugEnemySpeed) debugEnemySpeed.textContent = CONFIG.ENEMY_SPEED.toFixed(1);
+        if (debugEnemyHealth) debugEnemyHealth.textContent = CONFIG.ENEMY_HEALTH;
+        if (debugEnemyReward) debugEnemyReward.textContent = CONFIG.ENEMY_REWARD;
+        
+        // Wave Settings
+        const debugMaxWaves = document.getElementById('debugMaxWaves');
+        const debugEnemiesPerWave = document.getElementById('debugEnemiesPerWave');
+        const debugWaveMultiplier = document.getElementById('debugWaveMultiplier');
+        if (debugMaxWaves) debugMaxWaves.textContent = CONFIG.MAX_WAVES;
+        if (debugEnemiesPerWave) debugEnemiesPerWave.textContent = CONFIG.ENEMIES_PER_WAVE;
+        if (debugWaveMultiplier) debugWaveMultiplier.textContent = CONFIG.WAVE_MULTIPLIER.toFixed(1);
+        
+        // Game State
+        const debugCoins = document.getElementById('debugCoins');
+        const debugVillageLife = document.getElementById('debugVillageLife');
+        if (debugCoins) debugCoins.textContent = this.coins;
+        if (debugVillageLife) debugVillageLife.textContent = this.villageLife;
     }
     
     /**
@@ -2011,12 +2179,58 @@ class Game {
         if (costBasic) costBasic.textContent = `${CONFIG.TOWER_BASIC_COST} coins`;
         if (costUpgrade) costUpgrade.textContent = `${CONFIG.TOWER_UPGRADE_COST} coins`;
         if (costPremium) costPremium.textContent = `${CONFIG.TOWER_PREMIUM_COST} coins`;
+        
+        // Atualiza o estado de disponibilidade das torres baseado nas moedas
+        this.updateTowerShopAvailability();
+    }
+    
+    /**
+     * Atualiza a disponibilidade visual das torres no menu de compra
+     * Adiciona classe 'unaffordable' se o jogador não tiver dinheiro suficiente
+     */
+    updateTowerShopAvailability() {
+        const basicOption = document.getElementById('tower-basic');
+        const upgradeOption = document.getElementById('tower-upgrade');
+        const premiumOption = document.getElementById('tower-premium');
+        
+        // Basic Tower
+        if (basicOption) {
+            if (this.coins < CONFIG.TOWER_BASIC_COST) {
+                basicOption.classList.add('unaffordable');
+            } else {
+                basicOption.classList.remove('unaffordable');
+            }
+        }
+        
+        // Upgrade Tower
+        if (upgradeOption) {
+            if (this.coins < CONFIG.TOWER_UPGRADE_COST) {
+                upgradeOption.classList.add('unaffordable');
+            } else {
+                upgradeOption.classList.remove('unaffordable');
+            }
+        }
+        
+        // Premium Tower
+        if (premiumOption) {
+            if (this.coins < CONFIG.TOWER_PREMIUM_COST) {
+                premiumOption.classList.add('unaffordable');
+            } else {
+                premiumOption.classList.remove('unaffordable');
+            }
+        }
     }
 
     /**
      * Loop principal do jogo
      */
     gameLoop() {
+        // Se o jogo terminou, para o loop imediatamente
+        if (this.gameOver) {
+            this.animationFrameId = null;
+            return;
+        }
+        
         // Pega o tempo atual em milissegundos (preciso para animações e cooldowns)
         const currentTime = performance.now();
         
@@ -2024,11 +2238,24 @@ class Game {
         this.update(currentTime);
         // Desenha tudo no canvas
         this.draw();
+        
+        // Atualiza a tela de debug
+        this.updateDebugScreen();
 
         // Agenda o próximo frame (cria um loop infinito de 60 FPS)
         // requestAnimationFrame é uma função do navegador que chama a função
         // no próximo frame de renderização (geralmente 60 vezes por segundo)
-        requestAnimationFrame(() => this.gameLoop());
+        this.animationFrameId = requestAnimationFrame(() => this.gameLoop());
+    }
+    
+    /**
+     * Para o loop do jogo
+     */
+    stopGameLoop() {
+        if (this.animationFrameId !== null) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
     }
     
     /**
@@ -2047,6 +2274,7 @@ class Game {
      */
     restart() {
         // Para o loop atual
+        this.stopGameLoop();
         this.gameOver = true;
         
         // Reseta todas as variáveis
@@ -2058,20 +2286,41 @@ class Game {
         this.towers = [];
         this.enemies = [];
         this.projectiles = [];
+        this.coinParticles = [];
         this.waveInProgress = false;
         this.wavePauseStart = 0;
         this.enemiesInWave = 0;
         this.enemiesSpawned = 0;
+        this.lastSpawnTime = 0; // Reseta o tempo de spawn
+        this.waveSpeed = CONFIG.ENEMY_SPEED; // Reseta a velocidade para o valor base
+        this.waveHealth = CONFIG.ENEMY_HEALTH; // Reseta a vida para o valor base
+        this.currentMonsterType = 1; // Reseta o tipo de monstro
         this.selectedTowerPosition = null;
         
         // Atualiza o HUD
         this.updateHUD();
+        
+        // Atualiza a tela de debug
+        this.updateDebugScreen();
         
         // Atualiza os custos no menu de compra
         this.updateTowerShopCosts();
         
         // Reinicia o loop
         this.lastTime = performance.now();
+        // Reseta o tempo de spawn para evitar bugs ao reiniciar
+        this.lastSpawnTime = 0;
+        this.animationFrameId = null; // Garante que não há loop anterior
+        
+        // Debug: mostra que o jogo foi reiniciado
+        console.log('🔄 Jogo reiniciado - Stats resetados:');
+        console.log(`   Wave: ${this.wave}`);
+        console.log(`   Wave Speed: ${this.waveSpeed.toFixed(2)} (Base: ${CONFIG.ENEMY_SPEED.toFixed(2)})`);
+        console.log(`   Wave Health: ${this.waveHealth.toFixed(0)} (Base: ${CONFIG.ENEMY_HEALTH})`);
+        console.log(`   Last Spawn Time: ${this.lastSpawnTime}`);
+        
+        // Inicia o loop novamente
+        this.gameOver = false; // Garante que o jogo não está em gameOver antes de iniciar
         this.gameLoop();
     }
 }
@@ -2312,7 +2561,6 @@ class MenuManager {
         
         // Salva no localStorage
         localStorage.setItem('towerDefenseOptions', JSON.stringify(options));
-        console.log('✓ Opções guardadas');
     }
     
     /**
@@ -2321,6 +2569,43 @@ class MenuManager {
     applyOptions() {
         // Options are already applied in loadOptions()
         // This function exists to be called manually if needed
+    }
+    
+    /**
+     * Aplica as opções atualizadas ao jogo em execução
+     */
+    applyOptionsToGame() {
+        if (!window.gameInstance) return;
+        
+        const game = window.gameInstance;
+        
+        // Atualiza os custos das torres no menu de compra
+        game.updateTowerShopCosts();
+        
+        // Atualiza as torres existentes com novos valores de alcance, dano e fire rate
+        game.towers.forEach(tower => {
+            tower.range = CONFIG.TOWER_RANGE;
+            tower.damage = CONFIG.TOWER_DAMAGE;
+            
+            // Atualiza fire rate baseado no nível da torre
+            if (tower.upgradeLevel === 'upgrade' || tower.upgradeLevel === 'premium') {
+                tower.fireRate = CONFIG.TOWER_FIRE_RATE / 2;
+            } else {
+                tower.fireRate = CONFIG.TOWER_FIRE_RATE;
+            }
+        });
+        
+        // Atualiza projéteis existentes com novo dano
+        game.projectiles.forEach(projectile => {
+            projectile.damage = CONFIG.TOWER_DAMAGE;
+        });
+        
+        // Atualiza a tela de debug
+        game.updateDebugScreen();
+        
+        // Nota: STARTING_COINS e STARTING_VILLAGE_LIFE só se aplicam em novos jogos
+        // MAX_WAVES, ENEMIES_PER_WAVE, WAVE_MULTIPLIER serão aplicados nas próximas waves
+        // ENEMY_SPEED e ENEMY_HEALTH serão aplicados aos novos inimigos spawnados
     }
     
     /**
@@ -2448,6 +2733,10 @@ class MenuManager {
         
         // Botão Voltar do menu de opções - volta ao menu principal
         document.getElementById('btnBackToMenu').addEventListener('click', () => {
+            // Aplica as opções antes de voltar (caso o usuário tenha mudado algo)
+            this.readOptionsFromUI();
+            this.saveOptions();
+            this.applyOptionsToGame();
             this.showMainMenu();
         });
         
@@ -2455,6 +2744,8 @@ class MenuManager {
         document.getElementById('btnSaveOptions').addEventListener('click', () => {
             this.readOptionsFromUI();
             this.saveOptions();
+            // Apply options to running game if it exists
+            this.applyOptionsToGame();
             this.showMainMenu();
             alert('Options saved!');
         });
@@ -2469,7 +2760,13 @@ class MenuManager {
         // Back button (in game HUD) - returns to main menu
         document.getElementById('btnBackToMainMenu').addEventListener('click', () => {
             if (window.gameInstance) {
-                window.gameInstance.gameOver = true; // Para o jogo
+                // Apply current options before returning to menu
+                this.readOptionsFromUI();
+                this.saveOptions();
+                this.applyOptionsToGame();
+                // Para o jogo completamente
+                window.gameInstance.stopGameLoop();
+                window.gameInstance.gameOver = true;
             }
             this.showMainMenu();
         });
@@ -2514,6 +2811,7 @@ class MenuManager {
         // Redesenha o background quando o menu aparece
         setTimeout(() => this.drawMenuBackgrounds(), 50);
     }
+    
     
     /**
      * Mostra o jogo e inicia
