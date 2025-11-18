@@ -601,7 +601,7 @@ const DEFAULT_CONFIG = {
     STARTING_VILLAGE_LIFE: 100,
     TOWER_COST: 50,
     ENEMY_REWARD: 10,
-    TOWER_RANGE: 50,
+    TOWER_RANGE: 100,
     TOWER_DAMAGE: 25,
     TOWER_FIRE_RATE: 1000,
     TOWER_BASIC_COST: 50,
@@ -633,7 +633,7 @@ const CONFIG = {
     ENEMY_REWARD: 10,
     
     // Tower settings (can be changed in options)
-    TOWER_RANGE: 50,        // Range in pixels
+    TOWER_RANGE: 100,        // Range in pixels
     TOWER_DAMAGE: 25,        // Damage per projectile
     TOWER_FIRE_RATE: 1000,   // Time between shots (ms) - for basic tower
     
@@ -1409,12 +1409,21 @@ class Game {
         this.waveSpeed = CONFIG.ENEMY_SPEED; // Velocidade dos inimigos na wave atual
         this.waveHealth = CONFIG.ENEMY_HEALTH; // Vida dos inimigos na wave atual
         this.currentMonsterType = 1; // Tipo de monstro da wave atual
+        this.waveCountdownStart = 0; // Quando começou o contador antes da wave
+        this.waveCountdownActive = false; // Se o contador está ativo
 
         // Caminho que os inimigos vão seguir (array de pontos {x, y})
         this.path = this.generatePath();
 
         // Posição da torre que está sendo preview (quando o mouse passa por cima)
         this.selectedTowerPosition = null;
+        
+        // Estado de arrasto de torre
+        this.draggingTower = null; // Torre que está sendo arrastada
+        this.dragStartGridX = null; // Posição inicial no grid (X)
+        this.dragStartGridY = null; // Posição inicial no grid (Y)
+        this.dragCurrentGridX = null; // Posição atual no grid durante o arrasto (X)
+        this.dragCurrentGridY = null; // Posição atual no grid durante o arrasto (Y)
 
         // Configura os eventos do mouse (clique, movimento)
         this.setupEventListeners();
@@ -1484,15 +1493,37 @@ class Game {
      * Configura os event listeners
      */
     setupEventListeners() {
-        // Clique no canvas para colocar torre
-        this.canvas.addEventListener('click', (e) => {
+        // Mouse down - detecta se clicou em uma torre para arrastar
+        this.canvas.addEventListener('mousedown', (e) => {
             if (this.gameOver) return;
 
             const rect = this.canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
-            this.handleCanvasClick(x, y);
+            this.handleMouseDown(x, y);
+        });
+        
+        // Mouse move - atualiza posição durante arrasto ou preview
+        this.canvas.addEventListener('mousemove', (e) => {
+            if (this.gameOver) return;
+
+            const rect = this.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            this.handleMouseMove(x, y);
+        });
+        
+        // Mouse up - finaliza o arrasto ou coloca torre
+        this.canvas.addEventListener('mouseup', (e) => {
+            if (this.gameOver) return;
+
+            const rect = this.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            this.handleMouseUp(x, y);
         });
         
         // Event listeners para o menu de compra de torres
@@ -1520,25 +1551,106 @@ class Game {
                 this.updateTowerShopSelection();
             });
         }
-
-        // Movimento do mouse para preview da torre
-        this.canvas.addEventListener('mousemove', (e) => {
-            if (this.gameOver) return;
-
-            const rect = this.canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            this.handleMouseMove(x, y);
-        });
     }
 
     /**
-     * Processa o clique no canvas
+     * Processa o mouse down - detecta se clicou em uma torre para arrastar
+     * @param {number} x - Posição X do mouse
+     * @param {number} y - Posição Y do mouse
+     */
+    handleMouseDown(x, y) {
+        // Bloqueia interações durante o contador da wave
+        if (this.waveCountdownActive) {
+            return;
+        }
+        
+        // Converte a posição do mouse (em pixels) para posição no grid
+        const gridX = Math.floor(x / CONFIG.CELL_SIZE);
+        const gridY = Math.floor(y / CONFIG.CELL_SIZE);
+
+        // Verifica se está dentro dos limites do grid
+        if (gridX < 0 || gridX >= CONFIG.GRID_COLS || gridY < 0 || gridY >= CONFIG.GRID_ROWS) {
+            return; // Fora dos limites, não faz nada
+        }
+
+        // Verifica se clicou em uma torre existente
+        const clickedTower = this.getTowerAt(gridX, gridY);
+        if (clickedTower) {
+            // Inicia o arrasto da torre
+            this.draggingTower = clickedTower;
+            this.dragStartGridX = clickedTower.gridX;
+            this.dragStartGridY = clickedTower.gridY;
+            this.dragCurrentGridX = gridX;
+            this.dragCurrentGridY = gridY;
+            return;
+        }
+    }
+    
+    /**
+     * Processa o mouse up - finaliza arrasto ou coloca torre
+     * @param {number} x - Posição X do mouse
+     * @param {number} y - Posição Y do mouse
+     */
+    handleMouseUp(x, y) {
+        // Bloqueia interações durante o contador da wave
+        if (this.waveCountdownActive) {
+            // Se estava arrastando, cancela o arrasto
+            if (this.draggingTower) {
+                this.draggingTower = null;
+                this.dragStartGridX = null;
+                this.dragStartGridY = null;
+                this.dragCurrentGridX = null;
+                this.dragCurrentGridY = null;
+            }
+            return;
+        }
+        
+        // Se estava arrastando uma torre
+        if (this.draggingTower) {
+            // Converte a posição do mouse (em pixels) para posição no grid
+            const gridX = Math.floor(x / CONFIG.CELL_SIZE);
+            const gridY = Math.floor(y / CONFIG.CELL_SIZE);
+
+            // Verifica se está dentro dos limites do grid
+            if (gridX >= 0 && gridX < CONFIG.GRID_COLS && gridY >= 0 && gridY < CONFIG.GRID_ROWS) {
+                // Verifica se a nova posição é válida
+                // Não considera a torre sendo arrastada na verificação
+                const isValidPosition = !this.isOnPath(gridX, gridY) && 
+                                      !this.isTowerAtExcluding(gridX, gridY, this.draggingTower);
+                
+                if (isValidPosition) {
+                    // Move a torre para a nova posição
+                    this.draggingTower.gridX = gridX;
+                    this.draggingTower.gridY = gridY;
+                    this.draggingTower.x = gridX * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+                    this.draggingTower.y = gridY * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+                }
+            }
+            
+            // Finaliza o arrasto
+            this.draggingTower = null;
+            this.dragStartGridX = null;
+            this.dragStartGridY = null;
+            this.dragCurrentGridX = null;
+            this.dragCurrentGridY = null;
+            return;
+        }
+        
+        // Se não estava arrastando, tenta colocar uma nova torre
+        this.handlePlaceTower(x, y);
+    }
+    
+    /**
+     * Coloca uma nova torre no canvas
      * @param {number} x - Posição X do clique
      * @param {number} y - Posição Y do clique
      */
-    handleCanvasClick(x, y) {
+    handlePlaceTower(x, y) {
+        // Bloqueia colocação de torres durante o contador da wave
+        if (this.waveCountdownActive) {
+            return;
+        }
+        
         // Converte a posição do clique (em pixels) para posição no grid
         const gridX = Math.floor(x / CONFIG.CELL_SIZE);
         const gridY = Math.floor(y / CONFIG.CELL_SIZE);
@@ -1581,11 +1693,39 @@ class Game {
     }
 
     /**
-     * Processa o movimento do mouse para preview
+     * Processa o movimento do mouse para preview ou arrasto
      * @param {number} x - Posição X do mouse
      * @param {number} y - Posição Y do mouse
      */
     handleMouseMove(x, y) {
+        // Bloqueia preview durante o contador da wave
+        if (this.waveCountdownActive) {
+            this.selectedTowerPosition = null;
+            // Se estava arrastando, cancela o arrasto
+            if (this.draggingTower) {
+                this.draggingTower = null;
+                this.dragStartGridX = null;
+                this.dragStartGridY = null;
+                this.dragCurrentGridX = null;
+                this.dragCurrentGridY = null;
+            }
+            return;
+        }
+        
+        // Se está arrastando uma torre, atualiza a posição atual
+        if (this.draggingTower) {
+            const gridX = Math.floor(x / CONFIG.CELL_SIZE);
+            const gridY = Math.floor(y / CONFIG.CELL_SIZE);
+            
+            // Verifica se está dentro dos limites do grid
+            if (gridX >= 0 && gridX < CONFIG.GRID_COLS && gridY >= 0 && gridY < CONFIG.GRID_ROWS) {
+                this.dragCurrentGridX = gridX;
+                this.dragCurrentGridY = gridY;
+            }
+            return; // Não mostra preview de nova torre enquanto arrasta
+        }
+        
+        // Se não está arrastando, mostra preview de nova torre (lógica original)
         const gridX = Math.floor(x / CONFIG.CELL_SIZE);
         const gridY = Math.floor(y / CONFIG.CELL_SIZE);
 
@@ -1608,6 +1748,31 @@ class Game {
      */
     isTowerAt(gridX, gridY) {
         return this.towers.some(tower => tower.gridX === gridX && tower.gridY === gridY);
+    }
+    
+    /**
+     * Retorna a torre numa posição do grid, ou null se não houver
+     * @param {number} gridX - Posição X no grid
+     * @param {number} gridY - Posição Y no grid
+     * @returns {Tower|null}
+     */
+    getTowerAt(gridX, gridY) {
+        return this.towers.find(tower => tower.gridX === gridX && tower.gridY === gridY) || null;
+    }
+    
+    /**
+     * Verifica se existe uma torre numa posição do grid, excluindo uma torre específica
+     * @param {number} gridX - Posição X no grid
+     * @param {number} gridY - Posição Y no grid
+     * @param {Tower} excludeTower - Torre a excluir da verificação
+     * @returns {boolean}
+     */
+    isTowerAtExcluding(gridX, gridY, excludeTower) {
+        return this.towers.some(tower => 
+            tower !== excludeTower && 
+            tower.gridX === gridX && 
+            tower.gridY === gridY
+        );
     }
 
     /**
@@ -1634,7 +1799,7 @@ class Game {
         if (this.wave >= CONFIG.MAX_WAVES) {
             // Jogo completo! Vitória!
             this.gameOver = true;
-            alert(`Parabéns! Você completou todas as ${CONFIG.MAX_WAVES} waves!`);
+            this.showVictoryModal();
             return; // Para a função aqui
         }
         
@@ -1694,15 +1859,25 @@ class Game {
         if (this.gameOver || this.paused) return;
 
         // Gerencia as waves (ondas de inimigos)
-        if (!this.waveInProgress) {
-            // Se não há wave em progresso, está na pausa entre waves
+        if (!this.waveInProgress && !this.waveCountdownActive) {
+            // Se não há wave em progresso e não há contador ativo, está na pausa entre waves
             if (this.wavePauseStart === 0) {
                 // Marca quando começou a pausa
                 this.wavePauseStart = currentTime;
             } else if (currentTime - this.wavePauseStart >= CONFIG.WAVE_PAUSE_TIME) {
-                // Se passou o tempo de pausa, inicia a próxima wave
+                // Se passou o tempo de pausa, inicia o contador de 3 segundos
+                this.waveCountdownStart = currentTime;
+                this.waveCountdownActive = true;
+                this.wavePauseStart = 0; // Reseta o contador de pausa
+            }
+        } else if (this.waveCountdownActive) {
+            // Se o contador está ativo, verifica se já passaram 3 segundos
+            const countdownDuration = 3000; // 3 segundos
+            if (currentTime - this.waveCountdownStart >= countdownDuration) {
+                // Contador terminou, inicia a wave
+                this.waveCountdownActive = false;
+                this.waveCountdownStart = 0;
                 this.startWave();
-                this.wavePauseStart = 0; // Reseta o contador
             }
         } else {
             // Se há uma wave em progresso
@@ -1732,14 +1907,15 @@ class Game {
                 // Verifica se completou todas as waves configuradas
                 if (this.wave >= CONFIG.MAX_WAVES) {
                     this.gameOver = true;
-                    alert(`Congratulations! You completed all ${CONFIG.MAX_WAVES} waves!`);
+                    this.showVictoryModal();
                 }
             }
         }
 
-        // Inicia a primeira wave quando o jogo começa
-        if (this.wave === 0 && !this.waveInProgress) {
-            this.startWave();
+        // Inicia o contador da primeira wave quando o jogo começa
+        if (this.wave === 0 && !this.waveInProgress && !this.waveCountdownActive) {
+            this.waveCountdownStart = currentTime;
+            this.waveCountdownActive = true;
         }
 
         // Atualiza inimigos (incluindo os que estão morrendo)
@@ -1763,7 +1939,7 @@ class Game {
                 // Se a vida chegou a zero, game over
                 if (this.villageLife <= 0) {
                     this.gameOver = true;
-                    alert('Game Over! The village was destroyed!');
+                    this.showGameOverModal();
                 }
                 // Remove o inimigo que chegou ao fim
                 this.enemies.splice(i, 1);
@@ -1847,13 +2023,25 @@ class Game {
             towerCost = CONFIG.TOWER_PREMIUM_COST;
         }
         
-        if (this.selectedTowerPosition && this.coins >= towerCost) {
+        // Se está arrastando uma torre, desenha ela na nova posição
+        if (this.draggingTower && this.dragCurrentGridX !== null && this.dragCurrentGridY !== null) {
+            this.drawDraggingTower(this.dragCurrentGridX, this.dragCurrentGridY);
+        }
+        
+        // Desenha preview da torre (quando o mouse passa por cima de uma célula válida)
+        // Só mostra se não estiver arrastando
+        if (!this.draggingTower && this.selectedTowerPosition && this.coins >= towerCost) {
             this.drawTowerPreview(this.selectedTowerPosition.gridX, this.selectedTowerPosition.gridY);
         }
 
-        // Desenha todas as torres colocadas
+        // Desenha todas as torres colocadas (exceto a que está sendo arrastada)
         const currentTime = performance.now();
         for (const tower of this.towers) {
+            // Não desenha a torre que está sendo arrastada (ela será desenhada separadamente)
+            if (tower === this.draggingTower) {
+                continue;
+            }
+            
             // Atualiza animação da torre
             tower.update(currentTime);
             // Desenha a torre (passa currentTime para animação)
@@ -1878,8 +2066,61 @@ class Game {
         for (const particle of this.coinParticles) {
             particle.draw(this.ctx);
         }
+        
+        // Desenha o contador de wave se estiver ativo
+        if (this.waveCountdownActive) {
+            this.drawWaveCountdown();
+        }
     }
 
+    /**
+     * Desenha o contador de 3 segundos antes da wave começar
+     */
+    drawWaveCountdown() {
+        const currentTime = performance.now();
+        const countdownDuration = 3000; // 3 segundos
+        const elapsed = currentTime - this.waveCountdownStart;
+        const remaining = Math.max(0, countdownDuration - elapsed);
+        const seconds = Math.ceil(remaining / 1000);
+        
+        // Calcula a próxima wave (wave atual + 1, ou 1 se for a primeira)
+        const nextWave = this.wave + 1;
+        
+        // Salva o estado do canvas
+        this.ctx.save();
+        
+        // Desenha um fundo semi-transparente
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Configura o estilo do texto
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.strokeStyle = '#000000';
+        this.ctx.lineWidth = 4;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        // Desenha o número do contador (grande e centralizado)
+        const fontSize = 120;
+        this.ctx.font = `bold ${fontSize}px "8-bit-limit", sans-serif`;
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        
+        // Desenha o contorno (stroke) primeiro
+        this.ctx.strokeText(seconds.toString(), centerX, centerY);
+        // Depois desenha o preenchimento
+        this.ctx.fillText(seconds.toString(), centerX, centerY);
+        
+        // Desenha o texto "Wave X" abaixo do contador
+        const waveFontSize = 40;
+        this.ctx.font = `bold ${waveFontSize}px "8-bit-limit", sans-serif`;
+        this.ctx.strokeText(`Wave ${nextWave}`, centerX, centerY + fontSize / 2 + 30);
+        this.ctx.fillText(`Wave ${nextWave}`, centerX, centerY + fontSize / 2 + 30);
+        
+        // Restaura o estado do canvas
+        this.ctx.restore();
+    }
+    
     /**
      * Desenha o terreno usando tiles de ground
      */
@@ -1912,6 +2153,55 @@ class Game {
         }
     }
 
+    /**
+     * Desenha a torre sendo arrastada
+     * @param {number} gridX - Posição X no grid onde a torre está sendo arrastada
+     * @param {number} gridY - Posição Y no grid onde a torre está sendo arrastada
+     */
+    drawDraggingTower(gridX, gridY) {
+        if (!this.draggingTower) return;
+        
+        // Verifica se a posição é válida
+        // Não considera a torre sendo arrastada na verificação
+        const isValidPosition = !this.isOnPath(gridX, gridY) && 
+                               !this.isTowerAtExcluding(gridX, gridY, this.draggingTower);
+        
+        // Calcula a posição central da célula
+        const x = gridX * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+        const y = gridY * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+        
+        // Desenha o círculo de alcance da torre
+        this.ctx.strokeStyle = isValidPosition ? 'rgba(46, 204, 113, 0.5)' : 'rgba(231, 76, 60, 0.5)'; // Verde se válido, vermelho se inválido
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, CONFIG.TOWER_RANGE, 0, Math.PI * 2);
+        this.ctx.stroke();
+        
+        // Desenha a torre sendo arrastada (com transparência)
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.7; // Torne a torre semi-transparente
+        
+        // Cria uma torre temporária na nova posição para desenhar
+        const tempTower = new Tower(gridX, gridY, this.draggingTower.towerType, this.draggingTower.upgradeLevel);
+        tempTower.draw(this.ctx, false, performance.now());
+        
+        this.ctx.restore();
+        
+        // Desenha um indicador visual na posição original (onde a torre estava)
+        if (this.dragStartGridX !== null && this.dragStartGridY !== null) {
+            const originalX = this.dragStartGridX * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+            const originalY = this.dragStartGridY * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2;
+            
+            this.ctx.strokeStyle = 'rgba(243, 156, 18, 0.5)'; // Laranja para indicar posição original
+            this.ctx.lineWidth = 2;
+            this.ctx.setLineDash([5, 5]); // Linha tracejada
+            this.ctx.beginPath();
+            this.ctx.arc(originalX, originalY, CONFIG.CELL_SIZE * 0.4, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.setLineDash([]); // Remove o tracejado
+        }
+    }
+    
     /**
      * Desenha o grid
      */
@@ -2270,6 +2560,44 @@ class Game {
     }
     
     /**
+     * Mostra o modal de vitória
+     */
+    showVictoryModal() {
+        const modal = document.getElementById('gameModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        
+        modalTitle.textContent = 'Victory!';
+        modalTitle.className = 'modal-title victory';
+        modalMessage.textContent = `Parabéns! Você completou todas as ${CONFIG.MAX_WAVES} waves!`;
+        
+        modal.classList.remove('hidden');
+    }
+    
+    /**
+     * Mostra o modal de game over
+     */
+    showGameOverModal() {
+        const modal = document.getElementById('gameModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        
+        modalTitle.textContent = 'Game Over';
+        modalTitle.className = 'modal-title game-over';
+        modalMessage.textContent = 'A aldeia foi destruída! Tente novamente!';
+        
+        modal.classList.remove('hidden');
+    }
+    
+    /**
+     * Esconde o modal
+     */
+    hideModal() {
+        const modal = document.getElementById('gameModal');
+        modal.classList.add('hidden');
+    }
+    
+    /**
      * Reinicia o jogo com as novas configurações
      */
     restart() {
@@ -2289,13 +2617,25 @@ class Game {
         this.coinParticles = [];
         this.waveInProgress = false;
         this.wavePauseStart = 0;
+        this.waveCountdownActive = false;
+        this.waveCountdownStart = 0;
         this.enemiesInWave = 0;
         this.enemiesSpawned = 0;
         this.lastSpawnTime = 0; // Reseta o tempo de spawn
         this.waveSpeed = CONFIG.ENEMY_SPEED; // Reseta a velocidade para o valor base
         this.waveHealth = CONFIG.ENEMY_HEALTH; // Reseta a vida para o valor base
         this.currentMonsterType = 1; // Reseta o tipo de monstro
+        
+        // Esconde o modal se estiver visível
+        this.hideModal();
         this.selectedTowerPosition = null;
+        
+        // Reseta o estado de arrasto
+        this.draggingTower = null;
+        this.dragStartGridX = null;
+        this.dragStartGridY = null;
+        this.dragCurrentGridX = null;
+        this.dragCurrentGridY = null;
         
         // Atualiza o HUD
         this.updateHUD();
@@ -2679,7 +3019,7 @@ class MenuManager {
         CONFIG.TOWER_UPGRADE_COST = parseInt(document.getElementById('optTowerUpgradeCost').value) || 500;
         CONFIG.TOWER_PREMIUM_COST = parseInt(document.getElementById('optTowerPremiumCost').value) || 1000;
         CONFIG.ENEMY_REWARD = parseInt(document.getElementById('optEnemyReward').value) || 10;
-        CONFIG.TOWER_RANGE = parseInt(document.getElementById('optTowerRange').value) || 50;
+        CONFIG.TOWER_RANGE = parseInt(document.getElementById('optTowerRange').value) || 100;
         CONFIG.TOWER_DAMAGE = parseInt(document.getElementById('optTowerDamage').value) || 25;
         CONFIG.TOWER_FIRE_RATE = parseInt(document.getElementById('optTowerFireRate').value) || 1000;
         CONFIG.STARTING_COINS = parseInt(document.getElementById('optStartingCoins').value) || 200;
@@ -2784,6 +3124,22 @@ class MenuManager {
         document.getElementById('btnPause').addEventListener('click', () => {
             if (window.gameInstance) {
                 window.gameInstance.togglePause();
+            }
+        });
+        
+        // Botões do modal de game over/vitória
+        document.getElementById('btnModalRestart').addEventListener('click', () => {
+            if (window.gameInstance) {
+                window.gameInstance.hideModal();
+                window.gameInstance.restart();
+            }
+        });
+        
+        document.getElementById('btnModalMenu').addEventListener('click', () => {
+            if (window.gameInstance) {
+                window.gameInstance.hideModal();
+                window.gameInstance.stopGameLoop();
+                this.showMainMenu();
             }
         });
     }

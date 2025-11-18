@@ -546,4 +546,117 @@ body {
         1px 1px 0px #3d2817; /* Sombra menor no hover */
 }
 
+/* ============================================
+   GAME MODAL (Victory/Game Over)
+   ============================================ */
+
+.game-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.game-modal.hidden {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: #2c3e50;
+    border: 4px solid #34495e;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    min-width: 400px;
+    max-width: 600px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.3s ease-out;
+    position: relative;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-title {
+    font-family: "8-bit-limit", sans-serif;
+    font-size: 48px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+}
+
+.modal-title.victory {
+    color: #2ecc71;
+}
+
+.modal-title.game-over {
+    color: #e74c3c;
+}
+
+.modal-message {
+    font-family: "8-bit-limit", sans-serif;
+    font-size: 24px;
+    color: #ecf0f1;
+    margin-bottom: 30px;
+    line-height: 1.5;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.modal-btn {
+    background: #3498db;
+    color: white;
+    border: 3px solid #2980b9;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 10px;
+    cursor: url('assets/mouseHand.png') 10 10, pointer;
+    transition: all 0.3s;
+    font-family: "8-bit-limit", sans-serif;
+    font-weight: 600;
+    min-width: 150px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.modal-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    cursor: url('assets/mouseHandClick.png') 10 10, pointer;
+}
+
+.modal-btn:active {
+    transform: translateY(0);
+}
+
 
